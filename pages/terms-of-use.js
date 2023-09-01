@@ -42,13 +42,6 @@ const TermsOfUse = () => {
           <article className="container">
             <section>
               <div className={pageStyles.paragraph_text}>
-                <p className="get_app">
-                  The source code of this application, available under licenses,
-                  can be purchased at{" "}
-                  <a href="https://codecanyon.net/item/pdf-tools-high-quality-pdf-tools-nextjs-react-web-application/44924651">
-                    https://codecanyon.net/item/pdf-tools-high-quality-pdf-tools-nextjs-react-web-application/44924651
-                  </a>
-                </p>
                 <h3>{t("terms:title_01")}</h3>
                 <p>{t("terms:paragraph_01")}</p>
                 <h3>{t("terms:title_02")}</h3>

@@ -408,13 +408,6 @@ const OrganizePDFPages = () => {
             </header>
 
             <section className={pageStyles.article_content}>
-              <p className="get_app">
-                The source code of this application, available under licenses,
-                can be purchased at{" "}
-                <a href="https://codecanyon.net/item/pdf-tools-high-quality-pdf-tools-nextjs-react-web-application/44924651">
-                  https://codecanyon.net/item/pdf-tools-high-quality-pdf-tools-nextjs-react-web-application/44924651
-                </a>
-              </p>
               <p>{t("organize-pdf-pages:article_paragraph_01")}</p>
               <p>{t("organize-pdf-pages:article_paragraph_02")}</p>
               <p>{t("organize-pdf-pages:article_paragraph_03")}</p>
