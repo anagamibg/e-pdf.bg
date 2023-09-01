@@ -33,7 +33,6 @@ import ImagePreviewDraggable from "../components/ImagePreviewDraggable";
 import ProcessingFilesFormStep from "../components/ProcessingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
 import SetPagesSettingsFormStep from "../components/SetPagesSettingsFormStep";
-import AvailableTools from "../components/AvailableTools";
 import useImages from "../hooks/useImages";
 import useUploadStats from "../hooks/useUploadStats";
 import useToolsData from "../hooks/useToolsData";
@@ -491,7 +490,6 @@ const TIFFToPDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

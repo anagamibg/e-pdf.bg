@@ -24,7 +24,6 @@ import Steps from "../components/Steps";
 import Features from "../components/Features";
 import UploadingFilesFormStep from "../components/UploadingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
-import AvailableTools from "../components/AvailableTools";
 import ImagePreview from "../components/ImagePreview";
 import EditFilesFormStep from "../components/EditFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
@@ -421,7 +420,6 @@ const PPTXToPDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

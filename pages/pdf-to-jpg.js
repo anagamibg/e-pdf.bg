@@ -29,7 +29,6 @@ import UploadingFilesFormStep from "../components/UploadingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
 import EditFilesFormStep from "../components/EditFilesFormStep";
-import AvailableTools from "../components/AvailableTools";
 import Steps from "../components/Steps";
 import Features from "../components/Features";
 import styles from "../styles/UploadContainer.module.css";
@@ -554,7 +553,6 @@ const PDFToJPGPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

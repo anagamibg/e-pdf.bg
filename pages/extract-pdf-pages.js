@@ -29,7 +29,6 @@ import Features from "../components/Features";
 import UploadingFilesFormStep from "../components/UploadingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
-import AvailableTools from "../components/AvailableTools";
 import useUploadStats from "../hooks/useUploadStats";
 import useDocuments from "../hooks/useDocuments";
 import usePages from "../hooks/usePages";
@@ -607,7 +606,6 @@ const ExtractPagesPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

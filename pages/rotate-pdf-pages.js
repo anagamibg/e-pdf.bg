@@ -23,7 +23,6 @@ import DocumentPreviewSelectable from "../components/DocumentPreviewSelectable";
 import Features from "../components/Features";
 import EditFilesFormStep from "../components/EditFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
-import AvailableTools from "../components/AvailableTools";
 import usePages from "../hooks/usePages";
 import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
@@ -382,7 +381,6 @@ const RotatePDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

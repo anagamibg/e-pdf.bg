@@ -21,7 +21,6 @@ import UploadAreaFormStep from "../components/UploadAreaFormStep";
 import Steps from "../components/Steps";
 import Features from "../components/Features";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
-import AvailableTools from "../components/AvailableTools";
 import PasswordForm from "../components/PasswordForm";
 import styles from "../styles/UploadContainer.module.css";
 import {
@@ -356,7 +355,6 @@ const ProtectPDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

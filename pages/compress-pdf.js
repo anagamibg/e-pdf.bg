@@ -30,7 +30,6 @@ import UploadingFilesFormStep from "../components/UploadingFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
 import EditFilesFormStep from "../components/EditFilesFormStep";
 import { rotatePDFDocument } from "../helpers/pdf-utils";
-import AvailableTools from "../components/AvailableTools";
 import useDocuments from "../hooks/useDocuments";
 import useUploadStats from "../hooks/useUploadStats";
 import useToolsData from "../hooks/useToolsData";
@@ -737,7 +736,6 @@ const CompressPDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

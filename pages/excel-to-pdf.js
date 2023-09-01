@@ -26,7 +26,6 @@ import UploadingFilesFormStep from "../components/UploadingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
 import EditFilesFormStep from "../components/EditFilesFormStep";
-import AvailableTools from "../components/AvailableTools";
 import ImagePreview from "../components/ImagePreview";
 import useUploadStats from "../hooks/useUploadStats";
 import useDocuments from "../hooks/useDocuments";
@@ -421,7 +420,6 @@ const EXCELToPDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

@@ -27,7 +27,6 @@ import styles from "../styles/UploadContainer.module.css";
 import Features from "../components/Features";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
 import EditFilesFormStep from "../components/EditFilesFormStep";
-import AvailableTools from "../components/AvailableTools";
 import usePages from "../hooks/usePages";
 import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
@@ -408,7 +407,6 @@ const MergePDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

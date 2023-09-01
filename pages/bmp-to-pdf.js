@@ -33,7 +33,6 @@ import ImagePreviewDraggable from "../components/ImagePreviewDraggable";
 import ProcessingFilesFormStep from "../components/ProcessingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
 import SetPagesSettingsFormStep from "../components/SetPagesSettingsFormStep";
-import AvailableTools from "../components/AvailableTools";
 import styles from "../styles/UploadContainer.module.css";
 import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts.js";
@@ -500,7 +499,6 @@ const BMPToPDFPage = () => {
         </section>
         {/* Article End */}
 
-        <AvailableTools />
       </main>
     </>
   );

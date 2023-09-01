@@ -20,7 +20,6 @@ import Steps from "../components/Steps";
 import Features from "../components/Features";
 import EditFilesFormStep from "../components/EditFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
-import AvailableTools from "../components/AvailableTools";
 import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
@@ -260,7 +259,6 @@ const PDFToZipPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );

@@ -24,7 +24,6 @@ import Steps from "../components/Steps";
 import Features from "../components/Features";
 import UploadingFilesFormStep from "../components/UploadingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
-import AvailableTools from "../components/AvailableTools";
 import ImagePreview from "../components/ImagePreview";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
 import EditFilesFormStep from "../components/EditFilesFormStep";
@@ -424,7 +423,6 @@ const TextToPDFPage = () => {
           </article>
         </section>
         {/* Article End */}
-        <AvailableTools />
       </main>
     </>
   );
