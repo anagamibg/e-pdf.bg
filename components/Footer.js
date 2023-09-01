@@ -1,0 +1,72 @@
+import React, { useRef, useEffect } from "react";
+import Link from "next/link";
+import { useTranslation } from "next-i18next";
+import styles from "../styles/Footer.module.css";
+
+const Footer = React.memo(function Footer() {
+  const { t } = useTranslation();
+
+  const mountedRef = useRef();
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  return (
+    <footer className={`${styles.page_footer}`}>
+      <div className={`container text-center mb-0`}>
+        <div className={`row ${styles.footer_bottom}`}>
+          <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-start mb-3">
+            <img
+              src="https://e-pdf.bg/img/logo.png"
+              alt="e-pdf.bg"
+              style={{ maxWidth: "180px", marginBottom: "12px" }}
+            />
+            <p className={styles.footer_info}>
+              Създадено от{" "}
+              <a href="https://www.anagami.bg/en/" target="_blank" rel="noopener noreferrer">
+                Anagami Digital Accounting
+              </a>
+            </p>
+            <p className={styles.footer_info}>
+              &copy; 2026 e-pdf.bg &ndash; PDF Инструменти
+            </p>
+            <p className={styles.footer_info}>
+              <a href="https://www.facebook.com/anagami.bg" target="_blank" rel="noopener noreferrer">
+                Facebook
+              </a>
+              <span style={{ margin: "0 10px" }}>|</span>
+              <a href="https://www.linkedin.com/company/anagami-bg/" target="_blank" rel="noopener noreferrer">
+                LinkedIn
+              </a>
+              <span style={{ margin: "0 10px" }}>|</span>
+              <a href="https://www.instagram.com/anagami_bg/" target="_blank" rel="noopener noreferrer">
+                Instagram
+              </a>
+            </p>
+          </div>
+          <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-end text-end mb-3">
+            <p className={styles.footer_info}>
+              Anagami е запазена марка на АААкаунтинг Плюс EООД, ЕИК: 204467213
+              <br />
+              гр. София 1000, бул. Цар Освободител 14, Landmark Centre
+            </p>
+            <p className={styles.footer_info}>
+              <a href="https://www.anagami.bg/kontakti/" target="_blank" rel="noopener noreferrer">
+                Контакти
+              </a>
+              <span style={{ margin: "0 10px" }}>|</span>
+              <a href="https://e-pdf.bg/privacy-policy">
+                Защита на личните данни
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+});
+
+export default Footer;

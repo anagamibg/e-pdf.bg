@@ -1,0 +1,60 @@
+import React from "react";
+import Head from "next/head";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation } from "next-i18next";
+import pageStyles from "../styles/Page.module.css";
+export async function getStaticProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ["common", "contact"])),
+    },
+  };
+}
+
+const Contacts = () => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Head>
+        {/* Anything you add here will be added this page only */}
+        <title>{t("contact:title")}</title>
+        {/* IMPORTANT: Customize the meta tags below for better SEO. 
+            - "keywords" should include relevant terms users might search for (e.g., PDF tools, merge PDF, compress PDF). 
+            - "description" should be a brief, compelling summary of your site (e.g., "A powerful online tool for managing PDFs – merge, compress, convert, and more!"). 
+            - Avoid duplicate content across multiple websites.
+            - The "description" and "keywords" values can be modified in the respective JSON files for each page.  
+            - You can find these files in the `public/locales` folder.  
+            - For example, to update the meta tags for the "contact" page, edit the values of "meta_description" and "meta_keywords" in the `contact.json` file inside each locale folder.    */}
+        <meta name="description" content={t("contact:meta_description")} />
+        <meta name="Keywords" content={t("contact:meta_Keywords")} />
+        <meta name="robots" content="noindex,nofollow" />
+        {/* You can add your canonical link here to override the one in _app.js */}
+        {/* You can add your alternate here */}
+      </Head>
+      <main>
+        <header className="page_section header mb-0">
+          <h1 className="title">{t("common:contact")}</h1>
+        </header>
+        <section className="page_section mt-0">
+          <article className="container">
+            <section>
+              <div className={pageStyles.paragraph_text}>
+                <p className="get_app">
+                  The source code of this application, available under licenses,
+                  can be purchased at{" "}
+                  <a href="https://codecanyon.net/item/pdf-tools-high-quality-pdf-tools-nextjs-react-web-application/44924651">
+                    https://codecanyon.net/item/pdf-tools-high-quality-pdf-tools-nextjs-react-web-application/44924651
+                  </a>
+                </p>
+                <p>{t("contact:contact_text")}</p>
+              </div>
+            </section>
+          </article>
+        </section>
+      </main>
+    </>
+  );
+};
+
+export default Contacts;
