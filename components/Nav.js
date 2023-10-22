@@ -55,7 +55,7 @@ const Nav = React.memo(function Nav() {
               <img
                 src="/img/logo.png"
                 alt="e-pdf.bg"
-                style={{ height: "60px", width: "auto" }}
+                className={styles.logo_img}
               />
             </Link>
             <ul

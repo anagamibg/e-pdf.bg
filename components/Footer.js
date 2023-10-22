@@ -27,7 +27,7 @@ const Footer = React.memo(function Footer() {
             <p className={styles.footer_info}>
               Създадено от{" "}
               <a href="https://www.anagami.bg/en/" target="_blank" rel="noopener noreferrer">
-                Anagami Digital Accounting
+                <strong>Anagami Digital Accounting</strong>
               </a>
             </p>
             <p className={styles.footer_info}>
