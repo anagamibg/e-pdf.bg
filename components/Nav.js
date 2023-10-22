@@ -48,7 +48,7 @@ const Nav = React.memo(function Nav() {
 
   return (
     <>
-      <header>
+      <header className={styles.header}>
         <div>
           <nav className={`${styles.navigation}`}>
             <Link href="/" className={`${styles.logo}`}>
