@@ -112,6 +112,14 @@ const Nav = React.memo(function Nav() {
               </li>
             </ul>
             <div className={`${styles.nav_action}`}>
+              <a
+                href="https://www.anagami.bg/uslugi/schetovodno-obslujvane/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.cta_button}`}
+              >
+                Счетоводни услуги
+              </a>
               <div
                 className={`${styles.btn_primary}`}
                 onClick={() => setShowModal(true)}
