@@ -11,6 +11,7 @@ import {
   FiletypeTxt,
   Lock,
   Unlock,
+  PencilSquare,
 } from "react-bootstrap-icons";
 import { useTranslation } from "next-i18next";
 const useToolsData = () => {
@@ -383,6 +384,20 @@ const useToolsData = () => {
       outputFileMimeType: "application/pdf",
       thumbnailImageURL: "",
       URI: "/unlock-pdf",
+    },
+
+    EditPDFTool: {
+      key: "EditPDF",
+      title: t("common:tool_name_edit_pdf"),
+      description: t("common:tool_desc_edit_pdf"),
+      href: "/edit-pdf",
+      icon: <PencilSquare />,
+      acceptedInputMimeType: "application/pdf",
+      acceptedInputFileMaxSize: 26214400,
+      newFileNameSuffix: "_edited.pdf",
+      outputFileMimeType: "application/pdf",
+      thumbnailImageURL: "",
+      URI: "/edit-pdf",
     },
   };
 

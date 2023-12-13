@@ -98,6 +98,8 @@
   "tool_desc_pdf_to_zip": "Convert PDF files to ZIP file",
   "tool_desc_protect_pdf": "Add a password and encrypt your PDF file",
   "tool_desc_unlock_pdf": "Remove password from your protected PDF files",
+  "tool_name_edit_pdf": "Edit PDF",
+  "tool_desc_edit_pdf": "Add text and images to your PDF files",
   "processing": "Processing PDF",
   "convert_to_pdf": "Convert To PDF",
   "images_extraction_is_complete": "Your image(s) extraction is complete!",

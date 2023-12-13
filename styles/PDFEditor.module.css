@@ -1,0 +1,299 @@
+.editor_wrapper {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 2px solid var(--secondary);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--secondary);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.toolbar_group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tool_btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tool_btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.tool_btn.active {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--secondary);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+.tool_label {
+  font-size: 13px;
+}
+
+.delete_btn {
+  background: rgba(255, 68, 68, 0.2);
+  border-color: rgba(255, 68, 68, 0.4);
+  color: #ff8888;
+}
+
+.delete_btn:hover {
+  background: rgba(255, 68, 68, 0.4);
+  color: #fff;
+}
+
+.text_options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.text_input {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  font-size: 14px;
+  min-width: 200px;
+  outline: none;
+}
+
+.text_input:focus {
+  border-color: #2a74ed;
+  box-shadow: 0 0 0 2px rgba(42, 116, 237, 0.2);
+}
+
+.text_input::placeholder {
+  color: #999;
+}
+
+.text_controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.control_label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.number_input {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  font-size: 13px;
+  text-align: center;
+}
+
+.color_input {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.hint {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin: 0;
+  font-style: italic;
+}
+
+.canvas_container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  background: #f0f0f0;
+  overflow: auto;
+  min-height: 500px;
+  max-height: 70vh;
+}
+
+.canvas {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: #fff;
+  max-width: 100%;
+  height: auto;
+}
+
+.page_nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8f8f8;
+  border-top: 1px solid #e0e0e0;
+}
+
+.zoom_controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page_controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav_btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav_btn:hover:not(:disabled) {
+  background: #eee;
+  border-color: #ccc;
+}
+
+.nav_btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.zoom_label,
+.page_label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  min-width: 50px;
+  text-align: center;
+}
+
+.save_btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  background: var(--secondary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save_btn:hover:not(.disabled) {
+  opacity: 0.9;
+}
+
+.save_btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .tool_btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .tool_label {
+    display: none;
+  }
+
+  .text_options {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .text_input {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .text_controls {
+    flex-wrap: wrap;
+  }
+
+  .canvas_container {
+    min-height: 350px;
+    max-height: 55vh;
+    padding: 10px;
+  }
+
+  .page_nav {
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .save_btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hint {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .zoom_controls {
+    order: 2;
+  }
+  .page_controls {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+  }
+  .save_btn {
+    order: 3;
+  }
+}

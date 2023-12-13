@@ -98,6 +98,8 @@
   "tool_desc_pdf_to_zip": "Конвертирайте PDF файлове в ZIP архив",
   "tool_desc_protect_pdf": "Добавете парола и шифровайте вашия PDF файл",
   "tool_desc_unlock_pdf": "Премахнете паролата от защитени PDF файлове",
+  "tool_name_edit_pdf": "Редактиране на PDF",
+  "tool_desc_edit_pdf": "Добавяйте текст и снимки към вашите PDF файлове",
   "processing": "Обработка на PDF",
   "convert_to_pdf": "Конвертирай в PDF",
   "images_extraction_is_complete": "Извличането на изображения е завършено!",
