@@ -31,6 +31,7 @@ import {
 } from "../helpers/utils.js";
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -210,6 +211,13 @@ const ProtectPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("protect-pdf:title")}
+        description={t("protect-pdf:meta_description")}
+        toolUrl="/protect-pdf"
+        toolName={t("protect-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

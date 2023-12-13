@@ -32,6 +32,7 @@ import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -243,6 +244,14 @@ const RepairPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("repair-pdf:title")}
+        description={t("repair-pdf:meta_description")}
+        toolUrl="/repair-pdf"
+        toolName={t("repair-pdf:page_header_title")}
+      />
+
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("repair-pdf:page_header_title")}</h1>

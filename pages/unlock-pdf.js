@@ -31,6 +31,7 @@ import {
 } from "../helpers/utils.js";
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -228,6 +229,13 @@ const UnlockPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("unlock-pdf:title")}
+        description={t("unlock-pdf:meta_description")}
+        toolUrl="/unlock-pdf"
+        toolName={t("unlock-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

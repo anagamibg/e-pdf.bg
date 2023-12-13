@@ -23,6 +23,7 @@ import UploadAreaFormStep from "../components/UploadAreaFormStep";
 import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -135,6 +136,13 @@ const PDFToZipPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("pdf-to-zip:title")}
+        description={t("pdf-to-zip:meta_description")}
+        toolUrl="/pdf-to-zip"
+        toolName={t("pdf-to-zip:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

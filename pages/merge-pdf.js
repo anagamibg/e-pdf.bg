@@ -31,6 +31,7 @@ import usePages from "../hooks/usePages";
 import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -259,6 +260,13 @@ const MergePDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("merge-pdf:title")}
+        description={t("merge-pdf:meta_description")}
+        toolUrl="/merge-pdf"
+        toolName={t("merge-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

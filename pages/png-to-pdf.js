@@ -39,6 +39,7 @@ import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -319,6 +320,13 @@ const PNGToPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("png-to-pdf:title")}
+        description={t("png-to-pdf:meta_description")}
+        toolUrl="/png-to-pdf"
+        toolName={t("png-to-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

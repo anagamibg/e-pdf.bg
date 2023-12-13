@@ -44,6 +44,7 @@ import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -319,6 +320,13 @@ const PDFToJPGPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("pdf-to-jpg:title")}
+        description={t("pdf-to-jpg:meta_description")}
+        toolUrl="/pdf-to-jpg"
+        toolName={t("pdf-to-jpg:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

@@ -32,6 +32,7 @@ import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts.js";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -243,6 +244,13 @@ const TextToPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("txt-to-pdf:title")}
+        description={t("txt-to-pdf:meta_description")}
+        toolUrl="/txt-to-pdf"
+        toolName={t("txt-to-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

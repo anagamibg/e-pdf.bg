@@ -32,6 +32,7 @@ import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts.js";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -240,6 +241,13 @@ const PPTXToPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("pptx-to-pdf:title")}
+        description={t("pptx-to-pdf:meta_description")}
+        toolUrl="/pptx-to-pdf"
+        toolName={t("pptx-to-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

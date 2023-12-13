@@ -28,6 +28,7 @@ import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -230,6 +231,13 @@ const RotatePDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("rotate-pdf-pages:title")}
+        description={t("rotate-pdf-pages:meta_description")}
+        toolUrl="/rotate-pdf-pages"
+        toolName={t("rotate-pdf-pages:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

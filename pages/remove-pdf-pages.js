@@ -33,6 +33,7 @@ import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -264,6 +265,13 @@ const DeletePDFPages = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("remove-pdf-pages:title")}
+        description={t("remove-pdf-pages:meta_description")}
+        toolUrl="/remove-pdf-pages"
+        toolName={t("remove-pdf-pages:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

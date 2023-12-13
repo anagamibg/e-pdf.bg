@@ -40,6 +40,7 @@ import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -318,6 +319,13 @@ const TIFFToPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("tiff-to-pdf:title")}
+        description={t("tiff-to-pdf:meta_description")}
+        toolUrl="/tiff-to-pdf"
+        toolName={t("tiff-to-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

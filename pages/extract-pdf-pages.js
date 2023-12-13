@@ -40,6 +40,7 @@ import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -363,6 +364,13 @@ const ExtractPagesPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("extract-pdf-pages:title")}
+        description={t("extract-pdf-pages:meta_description")}
+        toolUrl="/extract-pdf-pages"
+        toolName={t("extract-pdf-pages:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

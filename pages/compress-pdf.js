@@ -38,6 +38,7 @@ import SelectOptionFormStep from "../components/SelectOptionFormStep.js";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep.js";
 import Alerts from "../components/Alerts.js";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -453,6 +454,13 @@ const CompressPDFPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("compress-pdf:title")}
+        description={t("compress-pdf:meta_description")}
+        toolUrl="/compress-pdf"
+        toolName={t("compress-pdf:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

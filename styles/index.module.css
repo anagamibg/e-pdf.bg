@@ -87,3 +87,25 @@
     margin-bottom: 0px;
   }
 }
+
+.seo_content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.seo_section {
+  margin-bottom: 2.5rem;
+}
+
+.seo_section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.seo_section p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}

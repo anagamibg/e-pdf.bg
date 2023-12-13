@@ -32,6 +32,7 @@ import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -269,6 +270,13 @@ const OrganizePDFPages = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("organize-pdf-pages:title")}
+        description={t("organize-pdf-pages:meta_description")}
+        toolUrl="/organize-pdf-pages"
+        toolName={t("organize-pdf-pages:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

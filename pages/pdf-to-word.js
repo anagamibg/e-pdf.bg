@@ -33,6 +33,7 @@ import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -242,6 +243,13 @@ const PDFToWordPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("pdf-to-word:title")}
+        description={t("pdf-to-word:meta_description")}
+        toolUrl="/pdf-to-word"
+        toolName={t("pdf-to-word:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">

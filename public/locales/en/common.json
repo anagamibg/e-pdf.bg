@@ -135,7 +135,16 @@
   "next_page": "Next page",
   "previous_page": "Previous page",
 
-  "title":"PDF Online Tools | Free, Easy, and Quick Online PDF tools", 
-  "meta_description": "Provide a relevant description for your site",
-  "meta_Keywords": "Enter your relevant keywords here"
+  "title": "Free Online PDF Tools | Merge, Convert, Compress PDF Files",
+  "meta_description": "Free online PDF tools to merge, convert, compress, and protect your PDF files. No registration, no limits, no watermarks. Works in your browser.",
+  "meta_Keywords": "PDF tools, merge PDF, compress PDF, convert PDF, PDF to Word, PDF to JPG, free online PDF tools",
+
+  "seo_section_1_title": "Free PDF Tools for Every Task",
+  "seo_section_1_text": "e-pdf.bg offers a complete set of free online PDF tools that cover all your document needs. Merge multiple files into one, compress large PDFs without losing quality, convert between PDF and popular formats like Word, Excel, PowerPoint, JPG, and PNG. All tools work directly in your browser — no installation, no sign-up, and completely free.",
+
+  "seo_section_2_title": "Convert PDF Files Online",
+  "seo_section_2_text": "Our conversion tools support a wide range of formats. Turn PDF files into editable Word documents, Excel spreadsheets, or PowerPoint presentations. Convert images in JPG, PNG, BMP, and TIFF formats to PDF and back. The conversion preserves the original formatting and quality of your documents, ensuring professional results every time.",
+
+  "seo_section_3_title": "Security and Data Privacy",
+  "seo_section_3_text": "Your data protection is our priority. All uploaded files are processed securely and deleted automatically after processing. We do not store copies of your documents or share them with third parties. You can also password-protect your PDF files or remove existing protection with our PDF security tools."
 }

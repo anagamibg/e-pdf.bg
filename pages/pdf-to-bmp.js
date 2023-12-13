@@ -43,6 +43,7 @@ import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
+import SeoSchema from "../components/SeoSchema";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -317,6 +318,13 @@ const PDFToBMPPage = () => {
           hrefLang="en"
         />
       </Head>
+
+      <SeoSchema
+        title={t("pdf-to-bmp:title")}
+        description={t("pdf-to-bmp:meta_description")}
+        toolUrl="/pdf-to-bmp"
+        toolName={t("pdf-to-bmp:page_header_title")}
+      />
 
       <main>
         <header className="page_section header mb-0">
