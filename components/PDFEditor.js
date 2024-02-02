@@ -53,6 +53,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const [textInput, setTextInput] = useState("");
   const [fontSize, setFontSize] = useState(16);
   const [fontColor, setFontColor] = useState("#000000");
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const [activeTool, setActiveTool] = useState(null); // 'text' | 'image' | null
   const [isProcessing, setIsProcessing] = useState(false);
   const [pdfPages, setPdfPages] = useState([]);
@@ -699,15 +700,38 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                   className={styles.number_input}
                 />
               </label>
-              <label className={styles.control_label}>
-                {t("edit-pdf:color")}:
-                <input
-                  type="color"
-                  value={fontColor}
-                  onChange={(e) => setFontColor(e.target.value)}
-                  className={styles.color_input}
+              <div className={styles.color_picker_wrapper}>
+                <span className={styles.control_label}>{t("edit-pdf:color")}:</span>
+                <button
+                  className={styles.color_preview}
+                  style={{ backgroundColor: fontColor }}
+                  onClick={() => setShowColorPicker(!showColorPicker)}
+                  title={t("edit-pdf:color")}
                 />
-              </label>
+                {showColorPicker && (
+                  <div className={styles.color_dropdown}>
+                    {[
+                      "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF",
+                      "#FF0000", "#FF4444", "#FF8800", "#FFCC00", "#FFFF00", "#88FF00",
+                      "#00CC00", "#00CCCC", "#0088FF", "#0044FF", "#0000FF", "#4400FF",
+                      "#8800FF", "#CC00FF", "#FF00CC", "#FF0088", "#884400", "#006644",
+                    ].map((color) => (
+                      <button
+                        key={color}
+                        className={`${styles.color_swatch} ${
+                          fontColor === color ? styles.color_swatch_active : ""
+                        }`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => {
+                          setFontColor(color);
+                          setShowColorPicker(false);
+                        }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <p className={styles.hint}>
               {t("edit-pdf:click_to_place")}

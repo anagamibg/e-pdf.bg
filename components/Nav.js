@@ -65,8 +65,12 @@ const Nav = React.memo(function Nav() {
               }`}
             >
               <li className={`${styles.nav_list} ${styles.remove_in_mobile}`}>
-                <Link href="/" className={`${styles.nav_link}`}>
-                  <span>{t("common:home_page")}</span>
+                <Link
+                  href={toolsData["EditPDFTool"].href}
+                  className={`${styles.nav_link}`}
+                  prefetch={false}
+                >
+                  <span>{toolsData["EditPDFTool"].title}</span>
                 </Link>
               </li>
 

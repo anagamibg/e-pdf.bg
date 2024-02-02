@@ -12,9 +12,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: var(--secondary);
-  border-bottom: 1px solid #e0e0e0;
+  padding: 14px 18px;
+  background: #fff;
+  border-bottom: 2px solid #e0e0e0;
 }
 
 .toolbar_group {
@@ -26,41 +26,42 @@
 .tool_btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 2px solid var(--secondary);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--secondary);
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
 }
 
 .tool_btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--secondary);
+  color: #fff;
 }
 
 .tool_btn.active {
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--secondary);
-  border-color: rgba(255, 255, 255, 0.95);
+  background: var(--secondary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tool_label {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .delete_btn {
-  background: rgba(255, 68, 68, 0.2);
-  border-color: rgba(255, 68, 68, 0.4);
-  color: #ff8888;
+  background: #fff;
+  border-color: #ff4444;
+  color: #ff4444;
 }
 
 .delete_btn:hover {
-  background: rgba(255, 68, 68, 0.4);
+  background: #ff4444;
   color: #fff;
 }
 
@@ -68,26 +69,27 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
 }
 
 .text_input {
-  padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
   color: #333;
   font-size: 14px;
-  min-width: 200px;
+  min-width: 220px;
   outline: none;
 }
 
 .text_input:focus {
-  border-color: #2a74ed;
-  box-shadow: 0 0 0 2px rgba(42, 116, 237, 0.2);
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(106, 85, 215, 0.15);
 }
 
 .text_input::placeholder {
@@ -97,41 +99,95 @@
 .text_controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .control_label {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #fff;
+  color: #444;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .number_input {
   width: 60px;
-  padding: 6px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 8px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
   color: #333;
-  font-size: 13px;
+  font-size: 14px;
   text-align: center;
 }
 
-.color_input {
-  width: 36px;
-  height: 32px;
-  padding: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
+.number_input:focus {
+  border-color: var(--secondary);
+  outline: none;
+}
+
+/* Custom Color Picker */
+.color_picker_wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color_preview {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 2px solid #ccc;
   cursor: pointer;
-  background: transparent;
+  transition: border-color 0.2s;
+  padding: 0;
+}
+
+.color_preview:hover {
+  border-color: var(--secondary);
+}
+
+.color_dropdown {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  padding: 10px;
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+}
+
+.color_swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.color_swatch:hover {
+  transform: scale(1.15);
+  border-color: #666;
+}
+
+.color_swatch_active {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px var(--secondary);
+  transform: scale(1.1);
 }
 
 .hint {
-  color: rgba(255, 255, 255, 0.7);
+  color: #888;
   font-size: 12px;
   margin: 0;
   font-style: italic;
@@ -161,9 +217,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
-  background: #f8f8f8;
-  border-top: 1px solid #e0e0e0;
+  padding: 14px 18px;
+  background: #fff;
+  border-top: 2px solid #e0e0e0;
 }
 
 .zoom_controls {
@@ -182,10 +238,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
   background: #fff;
   color: #555;
   cursor: pointer;
@@ -193,8 +249,8 @@
 }
 
 .nav_btn:hover:not(:disabled) {
-  background: #eee;
-  border-color: #ccc;
+  background: #f0f0f0;
+  border-color: #bbb;
 }
 
 .nav_btn:disabled {
@@ -204,32 +260,45 @@
 
 .zoom_label,
 .page_label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #555;
-  min-width: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #444;
+  min-width: 55px;
   text-align: center;
 }
 
+/* Save button - BIG and prominent */
 .save_btn {
-  padding: 10px 24px;
+  padding: 14px 36px;
   border: none;
-  border-radius: 6px;
-  background: var(--secondary);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #28a745, #20c997);
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .save_btn:hover:not(.disabled) {
-  opacity: 0.9;
+  background: linear-gradient(135deg, #218838, #1bae85);
+  box-shadow: 0 6px 18px rgba(40, 167, 69, 0.4);
+  transform: translateY(-1px);
+}
+
+.save_btn:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
 }
 
 .save_btn.disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  background: #aaa;
+  box-shadow: none;
 }
 
 /* Mobile responsive */
@@ -240,8 +309,8 @@
   }
 
   .tool_btn {
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
   }
 
   .tool_label {
@@ -277,10 +346,15 @@
   .save_btn {
     width: 100%;
     text-align: center;
+    padding: 14px 24px;
   }
 
   .hint {
     width: 100%;
+  }
+
+  .color_dropdown {
+    left: -60px;
   }
 }
 
