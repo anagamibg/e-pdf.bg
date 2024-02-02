@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   background: #fff;
-  border: 2px solid var(--secondary);
+  border: 2px solid #2563eb;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -13,8 +13,8 @@
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  background: linear-gradient(to bottom, #f8f7ff, #eeedf8);
-  border-bottom: 2px solid var(--secondary);
+  background: linear-gradient(to bottom, #eff4ff, #dce6fa);
+  border-bottom: 2px solid #2563eb;
 }
 
 .toolbar_group {
@@ -28,10 +28,10 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border: 2px solid var(--secondary);
+  border: 2px solid #2563eb;
   border-radius: 8px;
   background: #fff;
-  color: var(--secondary);
+  color: #2563eb;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -40,14 +40,14 @@
 }
 
 .tool_btn:hover {
-  background: var(--secondary);
+  background: #2563eb;
   color: #fff;
 }
 
 .tool_btn.active {
-  background: var(--secondary);
+  background: #2563eb;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 .tool_label {
@@ -73,8 +73,8 @@
   padding: 12px 16px;
   background: #fff;
   border-radius: 8px;
-  border: 2px solid var(--secondary);
-  box-shadow: 0 2px 8px rgba(106, 85, 215, 0.1);
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
 }
 
 .text_input {
@@ -89,8 +89,8 @@
 }
 
 .text_input:focus {
-  border-color: var(--secondary);
-  box-shadow: 0 0 0 3px rgba(106, 85, 215, 0.15);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .text_input::placeholder {
@@ -101,6 +101,44 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Bold / Italic / Underline buttons */
+.format_buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.format_btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.format_btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.format_active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.format_active:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
 }
 
 .control_label {
@@ -124,7 +162,7 @@
 }
 
 .number_input:focus {
-  border-color: var(--secondary);
+  border-color: #2563eb;
   outline: none;
 }
 
@@ -147,7 +185,7 @@
 }
 
 .color_preview:hover {
-  border-color: var(--secondary);
+  border-color: #2563eb;
 }
 
 .color_dropdown {
@@ -195,6 +233,35 @@
   border-color: #666;
 }
 
+/* Hex input row */
+.hex_input_row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hex_label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+}
+
+.hex_input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: monospace;
+  color: #333;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.hex_input:focus {
+  border-color: #2563eb;
+}
+
 .hint {
   color: #888;
   font-size: 12px;
@@ -227,8 +294,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 14px 18px;
-  background: linear-gradient(to top, #f8f7ff, #eeedf8);
-  border-top: 2px solid var(--secondary);
+  background: linear-gradient(to top, #eff4ff, #dce6fa);
+  border-top: 2px solid #2563eb;
 }
 
 .zoom_controls {
