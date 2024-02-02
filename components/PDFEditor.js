@@ -9,6 +9,7 @@ import {
   DashLg,
   ChevronLeft,
   ChevronRight,
+  Download,
 } from "react-bootstrap-icons";
 import styles from "../styles/PDFEditor.module.css";
 
@@ -54,6 +55,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const [fontSize, setFontSize] = useState(16);
   const [fontColor, setFontColor] = useState("#000000");
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorCanvasRef = useRef(null);
   const [activeTool, setActiveTool] = useState(null); // 'text' | 'image' | null
   const [isProcessing, setIsProcessing] = useState(false);
   const [pdfPages, setPdfPages] = useState([]);
@@ -522,6 +524,38 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     e.target.value = "";
   };
 
+  // Draw color gradient on canvas when picker opens
+  useEffect(() => {
+    if (!showColorPicker || !colorCanvasRef.current) return;
+    const canvas = colorCanvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Draw hue gradient (horizontal)
+    for (let x = 0; x < w; x++) {
+      const hue = (x / w) * 360;
+      const gradient = ctx.createLinearGradient(0, 0, 0, h);
+      gradient.addColorStop(0, `hsl(${hue}, 100%, 100%)`);
+      gradient.addColorStop(0.5, `hsl(${hue}, 100%, 50%)`);
+      gradient.addColorStop(1, `hsl(${hue}, 100%, 0%)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, 0, 1, h);
+    }
+  }, [showColorPicker]);
+
+  const handleColorCanvasClick = (e) => {
+    const canvas = colorCanvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.round((e.clientX - rect.left) * (canvas.width / rect.width));
+    const y = Math.round((e.clientY - rect.top) * (canvas.height / rect.height));
+    const ctx = canvas.getContext("2d");
+    const pixel = ctx.getImageData(x, y, 1, 1).data;
+    const hex = `#${pixel[0].toString(16).padStart(2, "0")}${pixel[1].toString(16).padStart(2, "0")}${pixel[2].toString(16).padStart(2, "0")}`.toUpperCase();
+    setFontColor(hex);
+  };
+
   const handleSave = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -612,9 +646,22 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
 
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      onSave(blob);
+
+      // Directly download the file
+      const newName = fileName
+        ? fileName.replace(/\.pdf$/i, "_edited.pdf")
+        : "edited.pdf";
+      const link = document.createElement("a");
+      link.download = newName;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+
+      // Also notify parent if callback exists
+      if (onSave) onSave(blob);
     } catch (err) {
       console.error("Error saving PDF:", err);
+      alert("Error processing PDF. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -710,25 +757,23 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 />
                 {showColorPicker && (
                   <div className={styles.color_dropdown}>
-                    {[
-                      "#000000", "#333333", "#666666", "#999999", "#CCCCCC", "#FFFFFF",
-                      "#FF0000", "#FF4444", "#FF8800", "#FFCC00", "#FFFF00", "#88FF00",
-                      "#00CC00", "#00CCCC", "#0088FF", "#0044FF", "#0000FF", "#4400FF",
-                      "#8800FF", "#CC00FF", "#FF00CC", "#FF0088", "#884400", "#006644",
-                    ].map((color) => (
-                      <button
-                        key={color}
-                        className={`${styles.color_swatch} ${
-                          fontColor === color ? styles.color_swatch_active : ""
-                        }`}
-                        style={{ backgroundColor: color }}
-                        onClick={() => {
-                          setFontColor(color);
-                          setShowColorPicker(false);
-                        }}
-                        title={color}
-                      />
-                    ))}
+                    <canvas
+                      ref={colorCanvasRef}
+                      width={220}
+                      height={120}
+                      className={styles.color_canvas}
+                      onClick={handleColorCanvasClick}
+                    />
+                    <div className={styles.color_quick_row}>
+                      {["#000000", "#FF0000", "#FF8800", "#FFCC00", "#00CC00", "#0088FF", "#0000FF", "#8800FF", "#FFFFFF"].map((c) => (
+                        <button
+                          key={c}
+                          className={styles.color_quick}
+                          style={{ backgroundColor: c }}
+                          onClick={() => { setFontColor(c); setShowColorPicker(false); }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -836,6 +881,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           onClick={handleSave}
           disabled={!hasElements || isProcessing}
         >
+          <Download size={20} />
           {isProcessing
             ? t("edit-pdf:processing")
             : t("edit-pdf:save_changes")}
