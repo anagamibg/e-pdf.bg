@@ -40,7 +40,7 @@ const MyApp = ({ Component, pageProps }) => {
         <link rel="apple-touch-icon" href="/img/favicon.png" />
         <meta
           name="google-site-verification"
-          content="add-your-google-site-verification-code"
+          content="AiD3ie47yTIXiSreigFga6kyR4cgi9Vx8x_EgfXX1Ro"
         />
         {/* Canonical link */}
         <link rel="canonical" href={canonicalUrl} key="canonical" />
