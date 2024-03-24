@@ -107,7 +107,7 @@ ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "docker restart dc9f48b7cc4b"
 |------|---------|
 | `hooks/useToolsData.js` | Central tool registry — all tools defined here |
 | `components/ToolsList.js` | Navigation dropdown menu — manually lists tools by group |
-| `components/Nav.js` | Header navigation with sticky positioning |
+| `components/Nav.js` | Header navigation with sticky positioning; includes inline language dropdown |
 | `components/PDFEditor.js` | Canvas-based PDF editor (text + images) |
 | `components/SeoSchema.js` | Reusable JSON-LD structured data |
 | `helpers/utils.js` | File handling, upload/download, notifications |
@@ -137,3 +137,4 @@ npm run lint   # ESLint
 - **noindex:** Currently active for development phase
 - **PDF Editor CDN:** pdf.js loaded from cdnjs.cloudflare.com (v3.11.174), not npm
 - **No fabric.js needed:** The editor uses native HTML5 Canvas API instead
+- **Language switcher:** Inline dropdown in nav (no modal). `LangModal.js` and `LangModal.module.css` removed. Styles live in `MegaMenu.module.css` under `.lang_dropdown*` classes.
