@@ -138,7 +138,7 @@ a:hover {
 .dot {
   height: 4px;
   width: 4px;
-  background-color: #ffa34f;
+  background-color: #1ab5a8;
   border-radius: 50%;
   display: inline-block;
   margin-left: 2px;
@@ -312,5 +312,5 @@ select:disabled {
 }
 
 .get_app a:hover {
-  color: #ffa34f !important;
+  color: #1ab5a8 !important;
 }

@@ -4,7 +4,7 @@
 }
 .toolbox.is_upload .toolbox_wrapper {
   border: 10px solid var(--secondary);
-  background-color: #6a55d7;
+  background-color: #1d5fcc;
   border-radius: 3px;
 }
 
@@ -448,7 +448,7 @@
   height: 100%;
   width: 0;
   border-radius: 16px;
-  background: linear-gradient(to right, var(--primary), #ffa34f9e);
+  background: linear-gradient(to right, var(--primary), #1ab5a89e);
   display: flex;
   justify-content: center;
   color: #fff;
@@ -579,7 +579,7 @@
 
 .pdf_to_image_option_desc {
   font-weight: bold;
-  color: #ffa34f;
+  color: #1ab5a8;
 }
 
 .select_title {
