@@ -4,7 +4,6 @@ import {
   Fonts,
   ImageFill,
   Trash,
-  ArrowsMove,
   PlusLg,
   DashLg,
   ChevronLeft,
@@ -13,6 +12,8 @@ import {
   TypeBold,
   TypeItalic,
   TypeUnderline,
+  EraserFill,
+  PenFill,
 } from "react-bootstrap-icons";
 import styles from "../styles/PDFEditor.module.css";
 
@@ -45,6 +46,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const signCanvasRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageElements, setPageElements] = useState({});
@@ -67,6 +69,16 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [pdfPages, setPdfPages] = useState([]);
   const renderingRef = useRef(false);
+
+  // Signature state
+  const [isDrawingSignature, setIsDrawingSignature] = useState(false);
+  const [signatureReady, setSignatureReady] = useState(false);
+  const signDrawingRef = useRef(false);
+  const lastSignPoint = useRef(null);
+
+  // Eraser size state
+  const [eraserWidth, setEraserWidth] = useState(80);
+  const [eraserHeight, setEraserHeight] = useState(30);
 
   // Load PDF and render pages
   useEffect(() => {
@@ -100,6 +112,20 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       }
     }
   }, [selectedElement]);
+
+  // Init signature canvas when tool activates
+  useEffect(() => {
+    if (activeTool === "signature" && signCanvasRef.current) {
+      const canvas = signCanvasRef.current;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      setSignatureReady(false);
+    }
+  }, [activeTool]);
 
   const loadPDF = async () => {
     try {
@@ -187,7 +213,6 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
             const ly = el.y * scaleMul + lineIdx * lineHeight;
             ctx.fillText(line, lx, ly);
 
-            // Draw underline
             if (el.underline) {
               const metrics = ctx.measureText(line);
               ctx.strokeStyle = el.color;
@@ -214,8 +239,21 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
               totalHeight + 8
             );
             ctx.setLineDash([]);
-
             drawDeleteHandle(ctx, el.x * scaleMul + measuredWidth + 4, el.y * scaleMul - 12);
+          }
+        } else if (el.type === "eraser") {
+          const sm = scale * 1.5;
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(el.x * sm, el.y * sm, el.width * sm, el.height * sm);
+
+          if (isSelected) {
+            ctx.strokeStyle = "#2563eb";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 3]);
+            ctx.strokeRect(el.x * sm - 2, el.y * sm - 2, el.width * sm + 4, el.height * sm + 4);
+            ctx.setLineDash([]);
+            drawResizeHandle(ctx, el.x * sm + el.width * sm, el.y * sm + el.height * sm);
+            drawDeleteHandle(ctx, el.x * sm + el.width * sm + 4, el.y * sm - 12);
           }
         } else if (el.type === "image") {
           const elImg = new Image();
@@ -239,13 +277,11 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 el.height * scale * 1.5 + 8
               );
               ctx.setLineDash([]);
-
               drawResizeHandle(
                 ctx,
                 el.x * scale * 1.5 + el.width * scale * 1.5,
                 el.y * scale * 1.5 + el.height * scale * 1.5
               );
-
               drawDeleteHandle(
                 ctx,
                 el.x * scale * 1.5 + el.width * scale * 1.5 + 4,
@@ -326,7 +362,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
         if (x >= el.x && x <= el.x + textWidth && y >= el.y && y <= el.y + textHeight) {
           return { pageIndex: currentPage, elementIndex: i };
         }
-      } else if (el.type === "image") {
+      } else if (el.type === "eraser" || el.type === "image") {
         if (x >= el.x && x <= el.x + el.width && y >= el.y && y <= el.y + el.height) {
           return { pageIndex: currentPage, elementIndex: i };
         }
@@ -353,7 +389,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   };
 
   const isOnResizeHandle = (x, y, el) => {
-    if (el.type !== "image") return false;
+    if (el.type !== "image" && el.type !== "eraser") return false;
     const handleX = el.x + el.width;
     const handleY = el.y + el.height;
     return Math.abs(x - handleX) < 10 && Math.abs(y - handleY) < 10;
@@ -385,6 +421,10 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       setSelectedElement(null);
       if (activeTool === "text" && textInput.trim()) {
         addTextElement(x, y);
+      } else if (activeTool === "eraser") {
+        addEraserElement(x, y);
+      } else if (activeTool === "signature" && signatureReady) {
+        placeSignatureOnCanvas(x, y);
       }
     }
   };
@@ -397,11 +437,16 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     if (isResizing && selectedElement) {
       const { x, y } = getCanvasCoordinates(e);
       const el = (pageElements[selectedElement.pageIndex] || [])[selectedElement.elementIndex];
-      if (el && el.type === "image") {
-        const newWidth = Math.max(30, x - el.x);
-        const aspectRatio = el.originalHeight / el.originalWidth;
-        const newHeight = newWidth * aspectRatio;
-        updateElementSize(selectedElement.pageIndex, selectedElement.elementIndex, newWidth, newHeight);
+      if (el && (el.type === "image" || el.type === "eraser")) {
+        const newWidth = Math.max(20, x - el.x);
+        if (el.type === "image") {
+          const aspectRatio = el.originalHeight / el.originalWidth;
+          const newHeight = newWidth * aspectRatio;
+          updateElementSize(selectedElement.pageIndex, selectedElement.elementIndex, newWidth, newHeight);
+        } else {
+          const newHeight = Math.max(10, y - el.y);
+          updateElementSize(selectedElement.pageIndex, selectedElement.elementIndex, newWidth, newHeight);
+        }
       }
     }
   };
@@ -441,19 +486,30 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       underline: isUnderline,
       width: 200,
     };
-
     setPageElements((prev) => ({
       ...prev,
       [currentPage]: [...(prev[currentPage] || []), newElement],
     }));
-
     setTextInput("");
+  };
+
+  const addEraserElement = (x, y) => {
+    const newElement = {
+      type: "eraser",
+      x: x - eraserWidth / 2,
+      y: y - eraserHeight / 2,
+      width: eraserWidth,
+      height: eraserHeight,
+    };
+    setPageElements((prev) => ({
+      ...prev,
+      [currentPage]: [...(prev[currentPage] || []), newElement],
+    }));
   };
 
   const addImageElement = (dataUrl, width, height) => {
     const maxWidth = 200;
     const scaleFactor = width > maxWidth ? maxWidth / width : 1;
-
     const newElement = {
       type: "image",
       dataUrl,
@@ -464,11 +520,37 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       originalWidth: width * scaleFactor,
       originalHeight: height * scaleFactor,
     };
-
     setPageElements((prev) => ({
       ...prev,
       [currentPage]: [...(prev[currentPage] || []), newElement],
     }));
+  };
+
+  const placeSignatureOnCanvas = (x, y) => {
+    const signCanvas = signCanvasRef.current;
+    if (!signCanvas) return;
+    const dataUrl = signCanvas.toDataURL("image/png");
+    const maxWidth = 150;
+    const aspect = signCanvas.height / signCanvas.width;
+    const newElement = {
+      type: "image",
+      dataUrl,
+      x: x - maxWidth / 2,
+      y: y - (maxWidth * aspect) / 2,
+      width: maxWidth,
+      height: maxWidth * aspect,
+      originalWidth: maxWidth,
+      originalHeight: maxWidth * aspect,
+    };
+    setPageElements((prev) => ({
+      ...prev,
+      [currentPage]: [...(prev[currentPage] || []), newElement],
+    }));
+    // Clear signature canvas after placing
+    const ctx = signCanvas.getContext("2d");
+    ctx.clearRect(0, 0, signCanvas.width, signCanvas.height);
+    setSignatureReady(false);
+    setActiveTool(null);
   };
 
   const updateElementPosition = (pageIndex, elementIndex, x, y) => {
@@ -487,12 +569,10 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     });
   };
 
-  // Update selected text element property
   const updateSelectedTextProp = (prop, value) => {
     if (!selectedElement) return;
     const el = (pageElements[selectedElement.pageIndex] || [])[selectedElement.elementIndex];
     if (!el || el.type !== "text") return;
-
     setPageElements((prev) => {
       const elements = [...(prev[selectedElement.pageIndex] || [])];
       elements[selectedElement.elementIndex] = { ...elements[selectedElement.elementIndex], [prop]: value };
@@ -512,27 +592,80 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
-      img.onload = () => {
-        addImageElement(reader.result, img.width, img.height);
-      };
+      img.onload = () => { addImageElement(reader.result, img.width, img.height); };
       img.src = reader.result;
     };
     reader.readAsDataURL(file);
     e.target.value = "";
   };
 
-  // Draw color gradient on canvas when picker opens
+  // ── Signature canvas drawing ──────────────────────────────────────────
+  const getSignCoords = (e, canvas) => {
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.touches[0].clientY - rect.top) * (canvas.height / rect.height),
+      };
+    }
+    return {
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height),
+    };
+  };
+
+  const handleSignMouseDown = (e) => {
+    e.preventDefault();
+    signDrawingRef.current = true;
+    const canvas = signCanvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const { x, y } = getSignCoords(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    lastSignPoint.current = { x, y };
+  };
+
+  const handleSignMouseMove = (e) => {
+    e.preventDefault();
+    if (!signDrawingRef.current) return;
+    const canvas = signCanvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const { x, y } = getSignCoords(e, canvas);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    lastSignPoint.current = { x, y };
+  };
+
+  const handleSignMouseUp = (e) => {
+    e.preventDefault();
+    signDrawingRef.current = false;
+    lastSignPoint.current = null;
+    // Check if anything drawn
+    const canvas = signCanvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const hasContent = data.some((v, i) => i % 4 === 3 && v > 0);
+    setSignatureReady(hasContent);
+  };
+
+  const clearSignatureCanvas = () => {
+    const canvas = signCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setSignatureReady(false);
+  };
+
+  // ── Color picker ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!showColorPicker || !colorCanvasRef.current) return;
     const canvas = colorCanvasRef.current;
     const ctx = canvas.getContext("2d");
     const w = canvas.width;
     const h = canvas.height;
-
     for (let x = 0; x < w; x++) {
       const hue = (x / w) * 360;
       const gradient = ctx.createLinearGradient(0, 0, 0, h);
@@ -554,32 +687,23 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     const pixel = ctx.getImageData(x, y, 1, 1).data;
     const hex = `#${pixel[0].toString(16).padStart(2, "0")}${pixel[1].toString(16).padStart(2, "0")}${pixel[2].toString(16).padStart(2, "0")}`.toUpperCase();
     setFontColor(hex);
-    // If a text element is selected, update it too
-    if (selectedElement) {
-      updateSelectedTextProp("color", hex);
-    }
+    if (selectedElement) updateSelectedTextProp("color", hex);
   };
 
   const handleHexInputChange = (val) => {
     setHexInput(val);
-    // Validate hex
     if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
       setFontColor(val.toUpperCase());
-      if (selectedElement) {
-        updateSelectedTextProp("color", val.toUpperCase());
-      }
+      if (selectedElement) updateSelectedTextProp("color", val.toUpperCase());
     }
   };
 
   const handleColorQuickPick = (c) => {
     setFontColor(c);
     setShowColorPicker(false);
-    if (selectedElement) {
-      updateSelectedTextProp("color", c);
-    }
+    if (selectedElement) updateSelectedTextProp("color", c);
   };
 
-  // Toggle bold/italic/underline — update current state AND selected element if any
   const toggleBold = () => {
     const newVal = !isBold;
     setIsBold(newVal);
@@ -607,16 +731,13 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const handleSave = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
-
     try {
       const { PDFDocument, rgb } = await import("pdf-lib");
       const fontkit = (await import("@pdf-lib/fontkit")).default;
-
       const arrayBuffer = await pdfDocument.arrayBuffer();
       const pdfDoc = await PDFDocument.load(arrayBuffer);
       pdfDoc.registerFontkit(fontkit);
 
-      // Load font files for Cyrillic support
       const [regularFontBytes, italicFontBytes] = await Promise.all([
         fetch("/fonts/OpenSans-Regular.ttf").then((r) => r.arrayBuffer()),
         fetch("/fonts/OpenSans-Italic.ttf").then((r) => r.arrayBuffer()),
@@ -624,7 +745,6 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
 
       const regularFont = await pdfDoc.embedFont(regularFontBytes, { subset: true });
       const italicFont = await pdfDoc.embedFont(italicFontBytes, { subset: true });
-
       const pages = pdfDoc.getPages();
 
       for (const [pageIndexStr, elements] of Object.entries(pageElements)) {
@@ -632,7 +752,6 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
         if (pageIndex >= pages.length) continue;
         const page = pages[pageIndex];
         const { width: pdfWidth, height: pdfHeight } = page.getSize();
-
         const renderPage = pdfPages[pageIndex];
         if (!renderPage) continue;
 
@@ -644,26 +763,12 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
             const pdfFontSize = el.fontSize * scaleFactorX;
             const pdfX = el.x * scaleFactorX;
             const pdfY = pdfHeight - el.y * scaleFactorY - pdfFontSize;
-
             const hex = el.color.replace("#", "");
             const r = parseInt(hex.substring(0, 2), 16) / 255;
             const g = parseInt(hex.substring(2, 4), 16) / 255;
             const b = parseInt(hex.substring(4, 6), 16) / 255;
-
-            // Choose font based on bold/italic
-            // Note: Open Sans variable font supports weight, so we use the regular for normal/bold
-            // and italic for italic/bold-italic
             const font = el.italic ? italicFont : regularFont;
-
-            page.drawText(el.text, {
-              x: pdfX,
-              y: pdfY,
-              size: pdfFontSize,
-              font: font,
-              color: rgb(r, g, b),
-            });
-
-            // Draw underline as a line
+            page.drawText(el.text, { x: pdfX, y: pdfY, size: pdfFontSize, font, color: rgb(r, g, b) });
             if (el.underline) {
               const textWidth = font.widthOfTextAtSize(el.text, pdfFontSize);
               const lineY = pdfY - pdfFontSize * 0.1;
@@ -674,11 +779,20 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 color: rgb(r, g, b),
               });
             }
+          } else if (el.type === "eraser") {
+            const pdfX = el.x * scaleFactorX;
+            const pdfY = pdfHeight - el.y * scaleFactorY - el.height * scaleFactorY;
+            page.drawRectangle({
+              x: pdfX,
+              y: pdfY,
+              width: el.width * scaleFactorX,
+              height: el.height * scaleFactorY,
+              color: rgb(1, 1, 1),
+            });
           } else if (el.type === "image") {
             let embeddedImage;
             const response = await fetch(el.dataUrl);
             const imageBytes = await response.arrayBuffer();
-
             try {
               if (el.dataUrl.includes("image/png") || el.dataUrl.includes(".png")) {
                 embeddedImage = await pdfDoc.embedPng(imageBytes);
@@ -686,23 +800,15 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 embeddedImage = await pdfDoc.embedJpg(imageBytes);
               }
             } catch {
-              try {
-                embeddedImage = await pdfDoc.embedPng(imageBytes);
-              } catch {
-                embeddedImage = await pdfDoc.embedJpg(imageBytes);
-              }
+              try { embeddedImage = await pdfDoc.embedPng(imageBytes); }
+              catch { embeddedImage = await pdfDoc.embedJpg(imageBytes); }
             }
-
             const pdfX = el.x * scaleFactorX;
             const pdfY = pdfHeight - el.y * scaleFactorY - el.height * scaleFactorY;
-            const pdfImgWidth = el.width * scaleFactorX;
-            const pdfImgHeight = el.height * scaleFactorY;
-
             page.drawImage(embeddedImage, {
-              x: pdfX,
-              y: pdfY,
-              width: pdfImgWidth,
-              height: pdfImgHeight,
+              x: pdfX, y: pdfY,
+              width: el.width * scaleFactorX,
+              height: el.height * scaleFactorY,
             });
           }
         }
@@ -710,16 +816,12 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
 
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
-
-      const newName = fileName
-        ? fileName.replace(/\.pdf$/i, "_edited.pdf")
-        : "edited.pdf";
+      const newName = fileName ? fileName.replace(/\.pdf$/i, "_edited.pdf") : "edited.pdf";
       const link = document.createElement("a");
       link.download = newName;
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
-
       if (onSave) onSave(blob);
     } catch (err) {
       console.error("Error saving PDF:", err);
@@ -730,8 +832,6 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   };
 
   const hasElements = Object.values(pageElements).some((els) => els.length > 0);
-
-  // Check if a text element is currently selected
   const selectedTextEl = selectedElement
     ? (pageElements[selectedElement.pageIndex] || [])[selectedElement.elementIndex]
     : null;
@@ -742,43 +842,52 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.toolbar_group}>
+          {/* Text tool */}
           <button
             className={`${styles.tool_btn} ${activeTool === "text" ? styles.active : ""}`}
-            onClick={() => {
-              setActiveTool(activeTool === "text" ? null : "text");
-              setSelectedElement(null);
-            }}
+            onClick={() => { setActiveTool(activeTool === "text" ? null : "text"); setSelectedElement(null); }}
             title={t("edit-pdf:add_text")}
           >
             <Fonts size={18} />
             <span className={styles.tool_label}>{t("edit-pdf:add_text")}</span>
           </button>
 
+          {/* Image tool */}
           <button
             className={`${styles.tool_btn} ${activeTool === "image" ? styles.active : ""}`}
-            onClick={() => {
-              setActiveTool("image");
-              fileInputRef.current?.click();
-            }}
+            onClick={() => { setActiveTool("image"); fileInputRef.current?.click(); }}
             title={t("edit-pdf:add_image")}
           >
             <ImageFill size={18} />
             <span className={styles.tool_label}>{t("edit-pdf:add_image")}</span>
           </button>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/jpg"
-            onChange={handleImageUpload}
-            style={{ display: "none" }}
-          />
+          {/* Eraser tool */}
+          <button
+            className={`${styles.tool_btn} ${activeTool === "eraser" ? styles.active : ""}`}
+            onClick={() => { setActiveTool(activeTool === "eraser" ? null : "eraser"); setSelectedElement(null); }}
+            title={t("edit-pdf:add_eraser")}
+          >
+            <EraserFill size={18} />
+            <span className={styles.tool_label}>{t("edit-pdf:add_eraser")}</span>
+          </button>
+
+          {/* Signature tool */}
+          <button
+            className={`${styles.tool_btn} ${activeTool === "signature" ? styles.active : ""}`}
+            onClick={() => { setActiveTool(activeTool === "signature" ? null : "signature"); setSelectedElement(null); }}
+            title={t("edit-pdf:add_signature")}
+          >
+            <PenFill size={18} />
+            <span className={styles.tool_label}>{t("edit-pdf:add_signature")}</span>
+          </button>
+
+          <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/jpg" onChange={handleImageUpload} style={{ display: "none" }} />
         </div>
 
-        {/* Text options — show when text tool active OR text element selected */}
+        {/* Text options */}
         {(activeTool === "text" || isTextSelected) && (
           <div className={styles.text_options}>
-            {/* Only show text input when adding new text (not editing existing) */}
             {activeTool === "text" && !isTextSelected && (
               <input
                 type="text"
@@ -790,110 +899,95 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                   if (e.key === "Enter" && textInput.trim()) {
                     const canvas = canvasRef.current;
                     if (canvas) {
-                      const centerX = canvas.width / (scale * 1.5) / 2 - 50;
-                      const centerY = canvas.height / (scale * 1.5) / 2;
-                      addTextElement(centerX, centerY);
+                      addTextElement(canvas.width / (scale * 1.5) / 2 - 50, canvas.height / (scale * 1.5) / 2);
                     }
                   }
                 }}
               />
             )}
-
             <div className={styles.text_controls}>
-              {/* Bold / Italic / Underline */}
               <div className={styles.format_buttons}>
-                <button
-                  className={`${styles.format_btn} ${isBold ? styles.format_active : ""}`}
-                  onClick={toggleBold}
-                  title="Bold"
-                >
-                  <TypeBold size={18} />
-                </button>
-                <button
-                  className={`${styles.format_btn} ${isItalic ? styles.format_active : ""}`}
-                  onClick={toggleItalic}
-                  title="Italic"
-                >
-                  <TypeItalic size={18} />
-                </button>
-                <button
-                  className={`${styles.format_btn} ${isUnderline ? styles.format_active : ""}`}
-                  onClick={toggleUnderline}
-                  title="Underline"
-                >
-                  <TypeUnderline size={18} />
-                </button>
+                <button className={`${styles.format_btn} ${isBold ? styles.format_active : ""}`} onClick={toggleBold} title="Bold"><TypeBold size={18} /></button>
+                <button className={`${styles.format_btn} ${isItalic ? styles.format_active : ""}`} onClick={toggleItalic} title="Italic"><TypeItalic size={18} /></button>
+                <button className={`${styles.format_btn} ${isUnderline ? styles.format_active : ""}`} onClick={toggleUnderline} title="Underline"><TypeUnderline size={18} /></button>
               </div>
-
               <label className={styles.control_label}>
                 {t("edit-pdf:font_size")}:
-                <input
-                  type="number"
-                  min="8"
-                  max="72"
-                  value={fontSize}
-                  onChange={(e) => handleFontSizeChange(e.target.value)}
-                  className={styles.number_input}
-                />
+                <input type="number" min="8" max="72" value={fontSize} onChange={(e) => handleFontSizeChange(e.target.value)} className={styles.number_input} />
               </label>
-
               <div className={styles.color_picker_wrapper}>
                 <span className={styles.control_label}>{t("edit-pdf:color")}:</span>
-                <button
-                  className={styles.color_preview}
-                  style={{ backgroundColor: fontColor }}
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                  title={t("edit-pdf:color")}
-                />
+                <button className={styles.color_preview} style={{ backgroundColor: fontColor }} onClick={() => setShowColorPicker(!showColorPicker)} title={t("edit-pdf:color")} />
                 {showColorPicker && (
                   <div className={styles.color_dropdown}>
-                    <canvas
-                      ref={colorCanvasRef}
-                      width={220}
-                      height={120}
-                      className={styles.color_canvas}
-                      onClick={handleColorCanvasClick}
-                    />
+                    <canvas ref={colorCanvasRef} width={220} height={120} className={styles.color_canvas} onClick={handleColorCanvasClick} />
                     <div className={styles.color_quick_row}>
-                      {["#000000", "#FF0000", "#FF8800", "#FFCC00", "#00CC00", "#0088FF", "#0000FF", "#8800FF", "#FFFFFF"].map((c) => (
-                        <button
-                          key={c}
-                          className={styles.color_quick}
-                          style={{ backgroundColor: c }}
-                          onClick={() => handleColorQuickPick(c)}
-                        />
+                      {["#000000","#FF0000","#FF8800","#FFCC00","#00CC00","#0088FF","#0000FF","#8800FF","#FFFFFF"].map((c) => (
+                        <button key={c} className={styles.color_quick} style={{ backgroundColor: c }} onClick={() => handleColorQuickPick(c)} />
                       ))}
                     </div>
                     <div className={styles.hex_input_row}>
                       <span className={styles.hex_label}>HEX:</span>
-                      <input
-                        type="text"
-                        className={styles.hex_input}
-                        value={hexInput}
-                        onChange={(e) => handleHexInputChange(e.target.value)}
-                        placeholder="#000000"
-                        maxLength={7}
-                      />
+                      <input type="text" className={styles.hex_input} value={hexInput} onChange={(e) => handleHexInputChange(e.target.value)} placeholder="#000000" maxLength={7} />
                     </div>
                   </div>
                 )}
               </div>
             </div>
-
             {activeTool === "text" && !isTextSelected && (
               <p className={styles.hint}>{t("edit-pdf:click_to_place")}</p>
             )}
           </div>
         )}
 
-        {/* Selected element controls */}
+        {/* Eraser size options */}
+        {activeTool === "eraser" && (
+          <div className={styles.text_options}>
+            <div className={styles.text_controls}>
+              <label className={styles.control_label}>
+                W:
+                <input type="number" min="10" max="500" value={eraserWidth} onChange={(e) => setEraserWidth(parseInt(e.target.value) || 80)} className={styles.number_input} />
+              </label>
+              <label className={styles.control_label}>
+                H:
+                <input type="number" min="10" max="300" value={eraserHeight} onChange={(e) => setEraserHeight(parseInt(e.target.value) || 30)} className={styles.number_input} />
+              </label>
+            </div>
+            <p className={styles.hint}>{t("edit-pdf:eraser_hint")}</p>
+          </div>
+        )}
+
+        {/* Signature pad */}
+        {activeTool === "signature" && (
+          <div className={styles.signature_panel}>
+            <canvas
+              ref={signCanvasRef}
+              width={320}
+              height={100}
+              className={styles.sign_canvas}
+              onMouseDown={handleSignMouseDown}
+              onMouseMove={handleSignMouseMove}
+              onMouseUp={handleSignMouseUp}
+              onMouseLeave={handleSignMouseUp}
+              onTouchStart={handleSignMouseDown}
+              onTouchMove={handleSignMouseMove}
+              onTouchEnd={handleSignMouseUp}
+            />
+            <div className={styles.sign_actions}>
+              <button className={styles.sign_clear_btn} onClick={clearSignatureCanvas}>{t("edit-pdf:clear_signature")}</button>
+              {signatureReady && (
+                <p className={styles.hint}>{t("edit-pdf:sign_hint")}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Delete selected element */}
         {selectedElement && (
           <div className={styles.toolbar_group}>
             <button
               className={`${styles.tool_btn} ${styles.delete_btn}`}
-              onClick={() =>
-                handleDeleteElement(selectedElement.pageIndex, selectedElement.elementIndex)
-              }
+              onClick={() => handleDeleteElement(selectedElement.pageIndex, selectedElement.elementIndex)}
               title={t("common:delete")}
             >
               <Trash size={18} />
@@ -916,13 +1010,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={{
-            cursor: isDragging
-              ? "grabbing"
-              : isResizing
-              ? "nwse-resize"
-              : activeTool === "text"
-              ? "text"
-              : "default",
+            cursor: isDragging ? "grabbing" : isResizing ? "nwse-resize" : activeTool === "text" ? "text" : activeTool === "eraser" ? "crosshair" : activeTool === "signature" && signatureReady ? "copy" : "default",
           }}
         />
       </div>
@@ -930,43 +1018,15 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       {/* Page navigation */}
       <div className={styles.page_nav}>
         <div className={styles.zoom_controls}>
-          <button
-            className={styles.nav_btn}
-            onClick={() => setScale((s) => Math.max(0.5, s - 0.1))}
-            title="Zoom out"
-          >
-            <DashLg size={16} />
-          </button>
+          <button className={styles.nav_btn} onClick={() => setScale((s) => Math.max(0.5, s - 0.1))} title="Zoom out"><DashLg size={16} /></button>
           <span className={styles.zoom_label}>{Math.round(scale * 100)}%</span>
-          <button
-            className={styles.nav_btn}
-            onClick={() => setScale((s) => Math.min(2, s + 0.1))}
-            title="Zoom in"
-          >
-            <PlusLg size={16} />
-          </button>
+          <button className={styles.nav_btn} onClick={() => setScale((s) => Math.min(2, s + 0.1))} title="Zoom in"><PlusLg size={16} /></button>
         </div>
-
         <div className={styles.page_controls}>
-          <button
-            className={styles.nav_btn}
-            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <span className={styles.page_label}>
-            {t("edit-pdf:page")} {currentPage + 1} / {totalPages}
-          </span>
-          <button
-            className={styles.nav_btn}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage >= totalPages - 1}
-          >
-            <ChevronRight size={16} />
-          </button>
+          <button className={styles.nav_btn} onClick={() => setCurrentPage((p) => Math.max(0, p - 1))} disabled={currentPage === 0}><ChevronLeft size={16} /></button>
+          <span className={styles.page_label}>{t("edit-pdf:page")} {currentPage + 1} / {totalPages}</span>
+          <button className={styles.nav_btn} onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))} disabled={currentPage >= totalPages - 1}><ChevronRight size={16} /></button>
         </div>
-
         <button
           className={`${styles.save_btn} ${!hasElements || isProcessing ? styles.disabled : ""}`}
           onClick={handleSave}

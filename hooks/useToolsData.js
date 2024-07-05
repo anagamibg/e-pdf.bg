@@ -18,6 +18,20 @@ const useToolsData = () => {
   const { t } = useTranslation();
 
   const toolsData = {
+    EditPDFTool: {
+      key: "EditPDF",
+      title: t("common:tool_name_edit_pdf"),
+      description: t("common:tool_desc_edit_pdf"),
+      href: "/edit-pdf",
+      icon: <PencilSquare />,
+      acceptedInputMimeType: "application/pdf",
+      acceptedInputFileMaxSize: 26214400,
+      newFileNameSuffix: "_edited.pdf",
+      outputFileMimeType: "application/pdf",
+      thumbnailImageURL: "",
+      URI: "/edit-pdf",
+    },
+
     MergePDFTool: {
       key: "MergePDF",
       title: t("common:tool_name_merge_pdf"),
@@ -386,19 +400,6 @@ const useToolsData = () => {
       URI: "/unlock-pdf",
     },
 
-    EditPDFTool: {
-      key: "EditPDF",
-      title: t("common:tool_name_edit_pdf"),
-      description: t("common:tool_desc_edit_pdf"),
-      href: "/edit-pdf",
-      icon: <PencilSquare />,
-      acceptedInputMimeType: "application/pdf",
-      acceptedInputFileMaxSize: 26214400,
-      newFileNameSuffix: "_edited.pdf",
-      outputFileMimeType: "application/pdf",
-      thumbnailImageURL: "",
-      URI: "/edit-pdf",
-    },
   };
 
   return toolsData;

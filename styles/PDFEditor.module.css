@@ -455,3 +455,110 @@
     order: 3;
   }
 }
+
+/* Eraser options panel */
+.eraser_options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 8px;
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+/* Signature panel */
+.signature_panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 8px;
+  border: 2px solid #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.sign_canvas {
+  border: 2px solid #2563eb;
+  border-radius: 6px;
+  cursor: crosshair;
+  background: #fafcff;
+  display: block;
+  touch-action: none;
+}
+
+.sign_actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: center;
+}
+
+.sign_clear_btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid #dc3545;
+  border-radius: 6px;
+  background: #fff;
+  color: #dc3545;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.sign_clear_btn:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+.sign_place_btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid #2563eb;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.sign_place_btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.sign_place_btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .eraser_options {
+    width: 100%;
+  }
+  .signature_panel {
+    width: 100%;
+    flex-direction: column;
+  }
+  .sign_canvas {
+    width: 100% !important;
+    max-width: 320px;
+  }
+  .sign_actions {
+    flex-direction: row;
+    width: 100%;
+  }
+}

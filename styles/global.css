@@ -43,7 +43,7 @@ body,
   --white: #fff;
   --dropdown-bg: rgb(252, 253, 251);
   --shadow: rgba(10, 37, 77, 0.14);
-  --nav-height: 5rem;
+  --nav-height: 4rem;
 }
 
 a {
