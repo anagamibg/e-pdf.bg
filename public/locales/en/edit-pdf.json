@@ -34,9 +34,10 @@
   "article_paragraph_01": "Our free online PDF editor allows you to add text and images directly to PDF files without installing any software. Simply upload your PDF, use the intuitive editing tools, and download the finished file.",
   "article_paragraph_02": "The tool supports adding text with customizable font, size and color, as well as inserting JPG and PNG images. All elements can be freely positioned and resized using drag & drop.",
   "article_paragraph_03": "Unlike many PDF editors, ours works entirely in the browser. Your files never leave your computer, ensuring maximum security and data privacy.",
-  "add_eraser": "Eraser",
-  "eraser_hint": "Click on the page to place a white rectangle over content",
-  "add_signature": "Signature",
+  "add_eraser": "White Box",
+  "eraser_hint": "Click on the page to place the rectangle over content",
+  "eraser_color": "Color",
+  "add_signature": "Add Signature",
   "sign_hint": "Draw your signature with the mouse, then click on the page to place it",
   "clear_signature": "Clear",
   "place_signature": "Place Signature"

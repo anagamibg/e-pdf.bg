@@ -76,9 +76,13 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const signDrawingRef = useRef(false);
   const lastSignPoint = useRef(null);
 
-  // Eraser size state
+  // Eraser size + color state
   const [eraserWidth, setEraserWidth] = useState(80);
   const [eraserHeight, setEraserHeight] = useState(30);
+  const [eraserColor, setEraserColor] = useState("#ffffff");
+  const [showEraserColorPicker, setShowEraserColorPicker] = useState(false);
+  const [eraserHexInput, setEraserHexInput] = useState("#ffffff");
+  const eraserColorCanvasRef = useRef(null);
 
   // Load PDF and render pages
   useEffect(() => {
@@ -243,7 +247,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           }
         } else if (el.type === "eraser") {
           const sm = scale * 1.5;
-          ctx.fillStyle = "#ffffff";
+          ctx.fillStyle = el.color || "#ffffff";
           ctx.fillRect(el.x * sm, el.y * sm, el.width * sm, el.height * sm);
 
           if (isSelected) {
@@ -500,6 +504,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       y: y - eraserHeight / 2,
       width: eraserWidth,
       height: eraserHeight,
+      color: eraserColor,
     };
     setPageElements((prev) => ({
       ...prev,
@@ -659,6 +664,50 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     setSignatureReady(false);
   };
 
+  // ── Eraser color picker canvas ─────────────────────────────────────────
+  useEffect(() => {
+    if (!showEraserColorPicker || !eraserColorCanvasRef.current) return;
+    const canvas = eraserColorCanvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    for (let x = 0; x < w; x++) {
+      const hue = (x / w) * 360;
+      const gradient = ctx.createLinearGradient(0, 0, 0, h);
+      gradient.addColorStop(0, `hsl(${hue}, 100%, 100%)`);
+      gradient.addColorStop(0.5, `hsl(${hue}, 100%, 50%)`);
+      gradient.addColorStop(1, `hsl(${hue}, 100%, 0%)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, 0, 1, h);
+    }
+  }, [showEraserColorPicker]);
+
+  const handleEraserColorCanvasClick = (e) => {
+    const canvas = eraserColorCanvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.round((e.clientX - rect.left) * (canvas.width / rect.width));
+    const y = Math.round((e.clientY - rect.top) * (canvas.height / rect.height));
+    const ctx = canvas.getContext("2d");
+    const pixel = ctx.getImageData(x, y, 1, 1).data;
+    const hex = `#${pixel[0].toString(16).padStart(2, "0")}${pixel[1].toString(16).padStart(2, "0")}${pixel[2].toString(16).padStart(2, "0")}`.toUpperCase();
+    setEraserColor(hex);
+    setEraserHexInput(hex);
+  };
+
+  const handleEraserHexInputChange = (val) => {
+    setEraserHexInput(val);
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      setEraserColor(val.toUpperCase());
+    }
+  };
+
+  const handleEraserColorQuickPick = (c) => {
+    setEraserColor(c);
+    setEraserHexInput(c);
+    setShowEraserColorPicker(false);
+  };
+
   // ── Color picker ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!showColorPicker || !colorCanvasRef.current) return;
@@ -782,12 +831,16 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           } else if (el.type === "eraser") {
             const pdfX = el.x * scaleFactorX;
             const pdfY = pdfHeight - el.y * scaleFactorY - el.height * scaleFactorY;
+            const eraserHex = (el.color || "#ffffff").replace("#", "");
+            const er = parseInt(eraserHex.substring(0, 2), 16) / 255;
+            const eg = parseInt(eraserHex.substring(2, 4), 16) / 255;
+            const eb = parseInt(eraserHex.substring(4, 6), 16) / 255;
             page.drawRectangle({
               x: pdfX,
               y: pdfY,
               width: el.width * scaleFactorX,
               height: el.height * scaleFactorY,
-              color: rgb(1, 1, 1),
+              color: rgb(er, eg, eb),
             });
           } else if (el.type === "image") {
             let embeddedImage;
@@ -940,7 +993,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           </div>
         )}
 
-        {/* Eraser size options */}
+        {/* Eraser size + color options */}
         {activeTool === "eraser" && (
           <div className={styles.text_options}>
             <div className={styles.text_controls}>
@@ -952,6 +1005,29 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 H:
                 <input type="number" min="10" max="300" value={eraserHeight} onChange={(e) => setEraserHeight(parseInt(e.target.value) || 30)} className={styles.number_input} />
               </label>
+              <div className={styles.color_picker_wrapper}>
+                <span className={styles.control_label}>{t("edit-pdf:eraser_color")}:</span>
+                <button
+                  className={styles.color_preview}
+                  style={{ backgroundColor: eraserColor, border: eraserColor === "#ffffff" ? "2px solid #ccc" : `2px solid ${eraserColor}` }}
+                  onClick={() => setShowEraserColorPicker(!showEraserColorPicker)}
+                  title={t("edit-pdf:eraser_color")}
+                />
+                {showEraserColorPicker && (
+                  <div className={styles.color_dropdown}>
+                    <canvas ref={eraserColorCanvasRef} width={220} height={120} className={styles.color_canvas} onClick={handleEraserColorCanvasClick} />
+                    <div className={styles.color_quick_row}>
+                      {["#ffffff","#000000","#FF0000","#FF8800","#FFFF00","#00CC00","#0088FF","#CCCCCC","#FFF9C4"].map((c) => (
+                        <button key={c} className={styles.color_quick} style={{ backgroundColor: c }} onClick={() => handleEraserColorQuickPick(c)} />
+                      ))}
+                    </div>
+                    <div className={styles.hex_input_row}>
+                      <span className={styles.hex_label}>HEX:</span>
+                      <input type="text" className={styles.hex_input} value={eraserHexInput} onChange={(e) => handleEraserHexInputChange(e.target.value)} placeholder="#ffffff" maxLength={7} />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <p className={styles.hint}>{t("edit-pdf:eraser_hint")}</p>
           </div>
