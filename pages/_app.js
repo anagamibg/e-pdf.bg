@@ -42,6 +42,17 @@ const MyApp = ({ Component, pageProps }) => {
           name="google-site-verification"
           content="AiD3ie47yTIXiSreigFga6kyR4cgi9Vx8x_EgfXX1Ro"
         />
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="e-pdf.bg" />
+        <meta property="og:image" content={`${process.env.NEXT_PUBLIC_APP_URL}/img/og-image.jpg`} />
+        <meta property="og:image:width" content="1280" />
+        <meta property="og:image:height" content="854" />
+        <meta property="og:image:alt" content="e-pdf.bg – Безплатни PDF инструменти онлайн" />
+        <meta property="og:url" content={canonicalUrl} />
+        {/* Twitter / X Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={`${process.env.NEXT_PUBLIC_APP_URL}/img/og-image.jpg`} />
         {/* Canonical link */}
         <link rel="canonical" href={canonicalUrl} key="canonical" />
       </Head>
