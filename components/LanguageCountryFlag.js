@@ -9,8 +9,8 @@ const LanguageCountryFlag = React.memo(function LanguageCountryFlag({
       <>
         <Image
           src="/img/flags/bg.png"
-          width={22}
-          height={22}
+          width={25}
+          height={25}
           loading="lazy"
           alt="BG Flag"
         />
@@ -21,8 +21,8 @@ const LanguageCountryFlag = React.memo(function LanguageCountryFlag({
       <>
         <Image
           src="/img/flags/en.png"
-          width={22}
-          height={22}
+          width={25}
+          height={25}
           loading="lazy"
           alt="EN Flag"
         />

@@ -311,10 +311,10 @@
 /* Flag images in language switcher */
 .btn_primary img,
 .lang_dropdown_item img {
-  width: 22px !important;
-  height: 22px !important;
+  width: 25px !important;
+  height: 25px !important;
+  object-fit: cover !important;
   flex-shrink: 0;
-  display: inline-block !important;
 }
 
 /* Language dropdown */
