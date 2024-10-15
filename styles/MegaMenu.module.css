@@ -308,6 +308,16 @@
   direction: ltr;
 }
 
+/* Circular flag images in language switcher */
+.btn_primary img,
+.lang_dropdown_item img {
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0;
+}
+
 /* Language dropdown */
 .lang_dropdown {
   position: relative;

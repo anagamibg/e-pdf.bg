@@ -11,12 +11,12 @@ const LanguageCountryFlag = React.memo(function LanguageCountryFlag({
           src={
             "https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.4/flags/1x1/bg.svg"
           }
-          width={14}
-          height={12}
+          width={20}
+          height={20}
           loading="lazy"
           alt="BG Flag"
         />
-        Bulgarian
+        Български
       </>
     ),
     en: (
@@ -25,8 +25,8 @@ const LanguageCountryFlag = React.memo(function LanguageCountryFlag({
           src={
             "https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.4/flags/1x1/us.svg"
           }
-          width={14}
-          height={12}
+          width={20}
+          height={20}
           loading="lazy"
           alt="US Flag"
         />
