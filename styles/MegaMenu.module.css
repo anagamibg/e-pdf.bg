@@ -308,14 +308,13 @@
   direction: ltr;
 }
 
-/* Circular flag images in language switcher */
+/* Flag images in language switcher */
 .btn_primary img,
 .lang_dropdown_item img {
-  border-radius: 50% !important;
-  object-fit: cover !important;
-  width: 20px !important;
-  height: 20px !important;
+  width: 22px !important;
+  height: 22px !important;
   flex-shrink: 0;
+  display: inline-block !important;
 }
 
 /* Language dropdown */

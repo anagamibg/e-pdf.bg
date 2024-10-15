@@ -8,11 +8,9 @@ const LanguageCountryFlag = React.memo(function LanguageCountryFlag({
     bg: (
       <>
         <Image
-          src={
-            "https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.4/flags/1x1/bg.svg"
-          }
-          width={20}
-          height={20}
+          src="/img/flags/bg.png"
+          width={22}
+          height={22}
           loading="lazy"
           alt="BG Flag"
         />
@@ -22,13 +20,11 @@ const LanguageCountryFlag = React.memo(function LanguageCountryFlag({
     en: (
       <>
         <Image
-          src={
-            "https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.4/flags/1x1/us.svg"
-          }
-          width={20}
-          height={20}
+          src="/img/flags/en.png"
+          width={22}
+          height={22}
           loading="lazy"
-          alt="US Flag"
+          alt="EN Flag"
         />
         English
       </>
