@@ -33,6 +33,7 @@ import {
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -51,6 +52,7 @@ const PDFToTextPage = () => {
   //loadedFilesCount is used to count the files currently being loaded to show progress spinner while loading the files //
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
   const [requestSignal, setRequestSignal] = useState();
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const { t } = useTranslation();
   const {
     currentUploadingFile,
@@ -228,6 +230,20 @@ const PDFToTextPage = () => {
     }
   }, [documents.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["PDFToTXT"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <Head>
@@ -256,12 +272,14 @@ const PDFToTextPage = () => {
         description={t("pdf-to-txt:meta_description")}
         toolUrl="/pdf-to-txt"
         toolName={t("pdf-to-txt:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("pdf-to-txt:page_header_title")}</h1>
           <p className="description">{t("pdf-to-txt:page_header_text")}</p>
+          <StarRating toolKey="PDFToTXT" />
         </header>
 
         <section className="page_section mt-0">

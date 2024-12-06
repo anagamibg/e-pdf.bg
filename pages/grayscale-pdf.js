@@ -34,6 +34,7 @@ import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -78,6 +79,7 @@ const GrayscalePDFPage = () => {
   //loadedFilesCount is used to count the files currently being loaded to show progress spinner while loading the files //
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
   const [requestSignal, setRequestSignal] = useState();
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
 
   const handleChange = (event) => {
     //Calling handleFileSelection function to extract pdf pages and their data and insert them in an array
@@ -224,6 +226,20 @@ const GrayscalePDFPage = () => {
     }
   }, [documents.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["GrayscalePDF"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <Head>
@@ -255,12 +271,14 @@ const GrayscalePDFPage = () => {
         description={t("grayscale-pdf:meta_description")}
         toolUrl="/grayscale-pdf"
         toolName={t("grayscale-pdf:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("grayscale-pdf:page_header_title")}</h1>
           <p className="description">{t("grayscale-pdf:page_header_text")}</p>
+          <StarRating toolKey="GrayscalePDF" />
         </header>
 
         <section className="page_section mt-0">

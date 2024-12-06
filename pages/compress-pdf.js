@@ -39,6 +39,7 @@ import DownloadFilesFormStep from "../components/DownloadFilesFormStep.js";
 import Alerts from "../components/Alerts.js";
 import pageStyles from "../styles/Page.module.css";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -60,6 +61,7 @@ const CompressPDFPage = () => {
   const [requestSignal, setRequestSignal] = useState();
 
   const [compressionLevel, setCompressionLevel] = useState(2);
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const { t } = useTranslation();
 
   const {
@@ -432,6 +434,20 @@ const CompressPDFPage = () => {
     }
   }, [documents.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["CompressPDF"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <Head>
@@ -460,12 +476,14 @@ const CompressPDFPage = () => {
         description={t("compress-pdf:meta_description")}
         toolUrl="/compress-pdf"
         toolName={t("compress-pdf:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("compress-pdf:page_header_title")}</h1>
           <p className="description">{t("compress-pdf:page_header_text")}</p>
+          <StarRating toolKey="CompressPDF" />
         </header>
 
         <section className="page_section mt-0">

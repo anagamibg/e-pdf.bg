@@ -32,6 +32,7 @@ import {
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -50,6 +51,7 @@ const UnlockPDFPage = () => {
   //loadedFilesCount is used to count the files currently being loaded to show progress spinner while loading the files //
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
   const [requestSignal, setRequestSignal] = useState();
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const { t } = useTranslation();
   const {
     resultsInfoVisibility,
@@ -207,6 +209,20 @@ const UnlockPDFPage = () => {
     }
   }, [documents.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["UnlockPDF"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <Head>
@@ -235,12 +251,14 @@ const UnlockPDFPage = () => {
         description={t("unlock-pdf:meta_description")}
         toolUrl="/unlock-pdf"
         toolName={t("unlock-pdf:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("unlock-pdf:page_header_title")}</h1>
           <p className="description">{t("unlock-pdf:page_header_text")}</p>
+          <StarRating toolKey="UnlockPDF" />
         </header>
 
         <section className="page_section mt-0">

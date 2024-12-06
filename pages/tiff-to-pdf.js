@@ -41,6 +41,7 @@ import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -59,6 +60,7 @@ const TIFFToPDFPage = () => {
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
   const [scrollOptions, setScrollOptions] = useState({});
   const [mergePages, setMergePages] = useState(true);
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
 
   const opts = {
     scrollAngleRanges: [
@@ -220,6 +222,20 @@ const TIFFToPDFPage = () => {
     }
   }, [pages.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["TIFFToPDF"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   const pagesComponentsArray = (
     <DndProvider
       backend={isMobile ? TouchBackend : HTML5Backend}
@@ -325,12 +341,14 @@ const TIFFToPDFPage = () => {
         description={t("tiff-to-pdf:meta_description")}
         toolUrl="/tiff-to-pdf"
         toolName={t("tiff-to-pdf:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("tiff-to-pdf:page_header_title")}</h1>
           <p className="description"> {t("tiff-to-pdf:page_header_text")}</p>
+          <StarRating toolKey="TIFFToPDF" />
         </header>
 
         <section className="page_section mt-0">

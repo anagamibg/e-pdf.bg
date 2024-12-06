@@ -24,6 +24,7 @@ import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import pageStyles from "../styles/Page.module.css";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -49,6 +50,7 @@ const PDFToZipPage = () => {
   const [isSpinnerActive, setIsSpinnerActive] = useState(false);
   //loadedFilesCount is used to count the files currently being loaded to show progress spinner while loading the files //
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
 
   const handleChange = (event) => {
     //Calling handlePDFToZIPFileSelection function to extract pdf pages and their data and insert them in an array
@@ -91,6 +93,20 @@ const PDFToZipPage = () => {
       }
     }
   }, [loadedFilesCount]);
+
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["PDFToZIP"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
 
   const pagesComponentsArray = (
     <div className={`${styles.previewer_content} d-flex flex-wrap`}>
@@ -142,12 +158,14 @@ const PDFToZipPage = () => {
         description={t("pdf-to-zip:meta_description")}
         toolUrl="/pdf-to-zip"
         toolName={t("pdf-to-zip:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("pdf-to-zip:page_header_title")}</h1>
           <p className="description">{t("pdf-to-zip:page_header_text")}</p>
+          <StarRating toolKey="PDFToZIP" />
         </header>
 
         <section className="page_section mt-0">

@@ -33,6 +33,7 @@ import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -50,6 +51,7 @@ const RepairPDFPage = () => {
   //loadedFilesCount is used to count the files currently being loaded to show progress spinner while loading the files //
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
   const [requestSignal, setRequestSignal] = useState();
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const { t } = useTranslation();
 
   const {
@@ -199,6 +201,20 @@ const RepairPDFPage = () => {
     }
   }, [documents.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["RepairPDF"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   const pagesComponentsArray = (
     <div className={`${styles.previewer_content} d-flex flex-wrap`}>
       {documents.map((doc) => {
@@ -250,12 +266,14 @@ const RepairPDFPage = () => {
         description={t("repair-pdf:meta_description")}
         toolUrl="/repair-pdf"
         toolName={t("repair-pdf:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("repair-pdf:page_header_title")}</h1>
           <p className="description">{t("repair-pdf:page_header_text")}</p>
+          <StarRating toolKey="RepairPDF" />
         </header>
 
         <section className="page_section mt-0">

@@ -23,6 +23,7 @@ import SeoSchema from "../components/SeoSchema";
 import Alerts from "../components/Alerts";
 import { handlePreventDefault, download, notify } from "../helpers/utils.js";
 import dynamic from "next/dynamic";
+import StarRating from "../components/StarRating";
 
 // Dynamic import of PDFEditor to avoid SSR issues with canvas/pdfjs
 const PDFEditor = dynamic(() => import("../components/PDFEditor"), {
@@ -48,6 +49,7 @@ const EditPDFPage = () => {
   const [pdfFileName, setPdfFileName] = useState("");
   const [resultBlob, setResultBlob] = useState(null);
   const [hasError, setHasError] = useState(false);
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -64,6 +66,20 @@ const EditPDFPage = () => {
       if (mountedRef.current) setIsSpinnerActive(false);
     }
   }, [loadedFilesCount]);
+
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["EditPDF"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
 
   const handleChange = (event) => {
     event.preventDefault();
@@ -150,12 +166,14 @@ const EditPDFPage = () => {
         description={t("edit-pdf:meta_description")}
         toolUrl="/edit-pdf"
         toolName={t("edit-pdf:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("edit-pdf:page_header_title")}</h1>
           <p className="description">{t("edit-pdf:page_header_text")}</p>
+          <StarRating toolKey="EditPDF" />
         </header>
 
         <section className="page_section mt-0">

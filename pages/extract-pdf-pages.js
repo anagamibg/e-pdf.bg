@@ -41,6 +41,7 @@ import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -62,6 +63,7 @@ const ExtractPagesPage = () => {
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
   const [requestSignal, setRequestSignal] = useState();
   const [scrollOptions, setScrollOptions] = useState({});
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const [extractionOption, setExtractionOption] = useState(
     "EXTRACT_SELECTED_PAGES"
   );
@@ -281,6 +283,20 @@ const ExtractPagesPage = () => {
     }
   }, [documents.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["ExtractPages"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   const pagesComponentsArray = (
     <div
       className={`previewer_content ${styles.previewer_content} d-flex flex-wrap ${styles.previewer_content_scrollable} mb-0`}
@@ -370,6 +386,7 @@ const ExtractPagesPage = () => {
         description={t("extract-pdf-pages:meta_description")}
         toolUrl="/extract-pdf-pages"
         toolName={t("extract-pdf-pages:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
@@ -378,6 +395,7 @@ const ExtractPagesPage = () => {
           <p className="description">
             {t("extract-pdf-pages:page_header_text")}
           </p>
+          <StarRating toolKey="ExtractPages" />
         </header>
 
         <section className="page_section mt-0">

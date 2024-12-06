@@ -40,6 +40,7 @@ import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -93,6 +94,7 @@ const BMPToPDFPage = () => {
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
   const [scrollOptions, setScrollOptions] = useState({});
   const [mergePages, setMergePages] = useState(true);
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const opts = {
     scrollAngleRanges: [
       { start: 30, end: 150 },
@@ -222,6 +224,20 @@ const BMPToPDFPage = () => {
     }
   }, [pages.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["BMPToPDF"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   const pagesComponentsArray = (
     <DndProvider
       backend={isMobile ? TouchBackend : HTML5Backend}
@@ -327,12 +343,14 @@ const BMPToPDFPage = () => {
         description={t("bmp-to-pdf:meta_description")}
         toolUrl="/bmp-to-pdf"
         toolName={t("bmp-to-pdf:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("bmp-to-pdf:page_header_title")}</h1>
           <p className="description">{t("bmp-to-pdf:page_header_text")}</p>
+          <StarRating toolKey="BMPToPDF" />
         </header>
 
         <section className="page_section mt-0">

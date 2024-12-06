@@ -45,6 +45,7 @@ import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -64,6 +65,7 @@ const PDFToJPGPage = () => {
   const [requestSignal, setRequestSignal] = useState();
   const [scrollOptions, setScrollOptions] = useState({});
   const [extractionOption, setExtractionOption] = useState(1);
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const { t } = useTranslation();
 
   const {
@@ -240,6 +242,20 @@ const PDFToJPGPage = () => {
     }
   }, [documents.length]);
 
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["PDFToJPG"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
+
   const pagesComponentsArray = (
     <div
       className={`previewer_content ${styles.previewer_content} d-flex flex-wrap ${styles.previewer_content_scrollable}`}
@@ -326,12 +342,14 @@ const PDFToJPGPage = () => {
         description={t("pdf-to-jpg:meta_description")}
         toolUrl="/pdf-to-jpg"
         toolName={t("pdf-to-jpg:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
         <header className="page_section header mb-0">
           <h1 className="title">{t("pdf-to-jpg:page_header_title")}</h1>
           <p className="description">{t("pdf-to-jpg:page_header_text")}</p>
+          <StarRating toolKey="PDFToJPG" />
         </header>
 
         <section className="page_section mt-0">

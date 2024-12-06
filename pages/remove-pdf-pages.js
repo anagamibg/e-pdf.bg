@@ -34,6 +34,7 @@ import pageStyles from "../styles/Page.module.css";
 
 import useSelectoSync from "../hooks/useSelectoSync";
 import SeoSchema from "../components/SeoSchema";
+import StarRating from "../components/StarRating";
 
 export async function getStaticProps({ locale }) {
   return {
@@ -50,6 +51,7 @@ const DeletePDFPages = () => {
   const mountedRef = useRef(false);
   //loadedFilesCount is used to count the files currently being loaded to show progress spinner while loading the files //
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
+  const [liveRating, setLiveRating] = useState({ ratingValue: "5.0", ratingCount: "3" });
   const [scrollOptions, setScrollOptions] = useState({});
   const opts = {
     scrollAngleRanges: [
@@ -145,6 +147,20 @@ const DeletePDFPages = () => {
       }
     }
   }, [loadedFilesCount]);
+
+  useEffect(() => {
+    fetch("/api/get-ratings")
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.ratings?.["RemovePDFPages"];
+        if (d)
+          setLiveRating({
+            ratingValue: d.averageRating.toFixed(1),
+            ratingCount: String(d.ratingCount),
+          });
+      })
+      .catch(() => {});
+  }, []);
 
   const pagesComponentsArray = (
     <DndProvider
@@ -271,6 +287,7 @@ const DeletePDFPages = () => {
         description={t("remove-pdf-pages:meta_description")}
         toolUrl="/remove-pdf-pages"
         toolName={t("remove-pdf-pages:page_header_title")}
+        aggregateRating={liveRating}
       />
 
       <main>
@@ -279,6 +296,7 @@ const DeletePDFPages = () => {
           <p className="description">
             {t("remove-pdf-pages:page_header_text")}
           </p>
+          <StarRating toolKey="RemovePDFPages" />
         </header>
 
         <section className="page_section mt-0">
