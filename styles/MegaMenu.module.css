@@ -313,7 +313,7 @@
 .lang_dropdown_item img {
   width: 25px !important;
   height: 25px !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   flex-shrink: 0;
 }
 
