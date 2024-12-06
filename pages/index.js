@@ -95,6 +95,18 @@ const Home = () => {
                     </div>
                   </Link>
                 ))}
+                <a
+                  className={styles.banner_card}
+                  href="https://www.anagami.bg/uslugi/schetovodno-obslujvane/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src="/img/anagami-banner.gif"
+                    alt="Anagami — Счетоводно обслужване"
+                    className={styles.banner_img}
+                  />
+                </a>
               </div>
             </section>
           </article>
