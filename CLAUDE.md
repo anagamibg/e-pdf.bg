@@ -3,7 +3,7 @@
 ## Project Overview
 **e-pdf.bg** is a free online PDF tools web application built with Next.js. It allows users to merge, compress, convert, edit, protect, and unlock PDF files. The site supports Bulgarian (bg, default) and English (en) localization.
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Live URL:** https://e-pdf.bg
 
 ## Tech Stack
@@ -80,13 +80,23 @@ The Edit PDF tool processes entirely in the browser:
 
 ### Deployment Steps
 ```bash
-# 1. Upload files to server host
-rsync -avz -e "ssh -i ~/.ssh/hetzner_key -o IdentitiesOnly=yes" \
-  ./path/to/files root@e-pdf.bg:/root/pdf-tools/
+# 1. Full rsync of project to server (excludes node_modules, .git, .next)
+rsync -avz --exclude='.git' --exclude='node_modules' --exclude='.next' \
+  -e "ssh -i ~/.ssh/hetzner_key -o IdentitiesOnly=yes" \
+  /Users/tsvet/Documents/Projects/e-pdf.bg/pdf-tools/ \
+  root@e-pdf.bg:/root/pdf-tools/
 
-# 2. Copy into Docker container
-ssh -i ~/.ssh/hetzner_key root@e-pdf.bg \
-  "docker cp /root/pdf-tools/path/. dc9f48b7cc4b:/app/path/"
+# 2. Copy all directories into Docker container
+ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "
+  docker cp /root/pdf-tools/components/. dc9f48b7cc4b:/app/components/ && \
+  docker cp /root/pdf-tools/styles/. dc9f48b7cc4b:/app/styles/ && \
+  docker cp /root/pdf-tools/pages/. dc9f48b7cc4b:/app/pages/ && \
+  docker cp /root/pdf-tools/hooks/. dc9f48b7cc4b:/app/hooks/ && \
+  docker cp /root/pdf-tools/helpers/. dc9f48b7cc4b:/app/helpers/ && \
+  docker cp /root/pdf-tools/public/. dc9f48b7cc4b:/app/public/ && \
+  docker exec dc9f48b7cc4b mkdir -p /app/data && \
+  docker cp /root/pdf-tools/data/ratings.json dc9f48b7cc4b:/app/data/ratings.json
+"
 
 # 3. Clear cache and rebuild
 ssh -i ~/.ssh/hetzner_key root@e-pdf.bg \
@@ -95,6 +105,8 @@ ssh -i ~/.ssh/hetzner_key root@e-pdf.bg \
 # 4. Restart container
 ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "docker restart dc9f48b7cc4b"
 ```
+
+> **Important:** Always use full rsync (step 1) + full docker cp (step 2) to avoid stale files in container after restart. The container does NOT persist files across recreation — only across `docker restart`.
 
 ### GitHub
 - **Repo:** `FileSubmit/e-pdf.bg`
@@ -109,7 +121,12 @@ ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "docker restart dc9f48b7cc4b"
 | `components/ToolsList.js` | Navigation dropdown menu — manually lists tools by group |
 | `components/Nav.js` | Header navigation with sticky positioning; includes inline language dropdown |
 | `components/PDFEditor.js` | Canvas-based PDF editor (text + images) |
-| `components/SeoSchema.js` | Reusable JSON-LD structured data |
+| `components/SeoSchema.js` | Reusable JSON-LD structured data; accepts optional `aggregateRating` prop for AggregateRating schema |
+| `components/StarRating.js` | Star rating widget (1–5★); localStorage deduplication (1 vote/user/tool) |
+| `styles/StarRating.module.css` | Styles for StarRating component |
+| `data/ratings.json` | Persistent ratings store (server-side JSON); seed: 3×5★ per tool; path configurable via `RATINGS_FILE_PATH` env |
+| `pages/api/get-ratings.js` | GET — returns aggregated ratings for all tools |
+| `pages/api/rate-tool.js` | POST — records a user rating; serialized write queue prevents JSON corruption |
 | `helpers/utils.js` | File handling, upload/download, notifications |
 | `helpers/files-repo.js` | Server-side file management, command execution |
 | `styles/global.css` | Global styles, CSS variables, base font settings |
@@ -132,9 +149,12 @@ npm run lint   # ESLint
 
 ## Important Notes
 - **Sticky header:** Uses `position: sticky` on `<header>` element. Requires `overflow-x: clip` (not `hidden`) on body.
-- **Base font-size:** `html { font-size: 16px }` for rem consistency, `body { line-height: 1.5 }`
+- **Base font:** `html { font-size: 16px }`, `body { font-size: 16px; font-weight: 300; line-height: 1.5 }`
 - **Google Analytics:** G-C4D38EX2MD (set in next.config.js)
 - **noindex:** Currently active for development phase
 - **PDF Editor CDN:** pdf.js loaded from cdnjs.cloudflare.com (v3.11.174), not npm
 - **No fabric.js needed:** The editor uses native HTML5 Canvas API instead
 - **Language switcher:** Inline dropdown in nav (no modal). `LangModal.js` and `LangModal.module.css` removed. Styles live in `MegaMenu.module.css` under `.lang_dropdown*` classes.
+- **Star ratings:** All 27 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
+- **Homepage banner:** Anagami.bg accounting services GIF banner added as last card in the tools grid (`/img/anagami-banner.gif`), links to `https://www.anagami.bg/uslugi/schetovodno-obslujvane/`.
+- **Deployment gotcha:** Container loses custom files on recreation. Always run full rsync + docker cp before build (see Deployment Steps above).
