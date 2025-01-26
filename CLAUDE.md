@@ -149,7 +149,7 @@ npm run lint   # ESLint
 
 ## Important Notes
 - **Sticky header:** Uses `position: sticky` on `<header>` element. Requires `overflow-x: clip` (not `hidden`) on body.
-- **Base font:** `html { font-size: 16px }`, `body { font-size: 16px; font-weight: 300; line-height: 1.5 }`
+- **Base font:** `html { font-size: 16px }`, `body { font-size: 16px; font-weight: 300; line-height: 1.5 }`, `.article_content { font-size: 16px; font-weight: 300; line-height: 24px }`
 - **Google Analytics:** G-C4D38EX2MD (set in next.config.js)
 - **noindex:** Currently active for development phase
 - **PDF Editor CDN:** pdf.js loaded from cdnjs.cloudflare.com (v3.11.174), not npm
