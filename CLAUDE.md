@@ -180,6 +180,7 @@ npm run lint   # ESLint
 - **Base font:** `html { font-size: 16px }`, `body { font-size: 16px; font-weight: 300; line-height: 1.5 }`, `.article_content { font-size: 16px; font-weight: 300; line-height: 24px }`
 - **Google Analytics:** G-C4D38EX2MD (set in next.config.js)
 - **noindex:** Currently active for development phase
+- **noindex pages (excluded from sitemap):** `privacy-policy` and `terms-of-use` (bg + en) — both have `noindex,nofollow` meta tag and are removed from `public/sitemap.xml`
 - **PDF Editor CDN:** pdf.js loaded from cdnjs.cloudflare.com (v3.11.174), not npm
 - **No fabric.js needed:** The editor uses native HTML5 Canvas API instead
 - **Language switcher:** Inline dropdown in nav (no modal). `LangModal.js` and `LangModal.module.css` removed. Styles live in `MegaMenu.module.css` under `.lang_dropdown*` classes.

@@ -542,40 +542,4 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/contacts"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/contacts"/>
   </url>
-  <url>
-    <loc>https://e-pdf.bg/privacy-policy</loc>
-    <lastmod>2026-02-18</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/privacy-policy"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/privacy-policy"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/privacy-policy"/>
-  </url>
-  <url>
-    <loc>https://e-pdf.bg/en/privacy-policy</loc>
-    <lastmod>2026-02-18</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/privacy-policy"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/privacy-policy"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/privacy-policy"/>
-  </url>
-  <url>
-    <loc>https://e-pdf.bg/terms-of-use</loc>
-    <lastmod>2026-02-18</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/terms-of-use"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/terms-of-use"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/terms-of-use"/>
-  </url>
-  <url>
-    <loc>https://e-pdf.bg/en/terms-of-use</loc>
-    <lastmod>2026-02-18</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/terms-of-use"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/terms-of-use"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/terms-of-use"/>
-  </url>
 </urlset>
