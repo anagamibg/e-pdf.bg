@@ -74,9 +74,13 @@ The Edit PDF tool processes entirely in the browser:
 ## Deployment
 
 ### Server
-- **Host:** Hetzner VPS at `e-pdf.bg`
-- **Container:** Docker (ID: `dc9f48b7cc4b`)
+- **Host:** Hetzner VPS at `e-pdf.bg` (IP: `89.167.5.212`)
+- **Container:** Docker (name: `epdf-container`, image: `epdf-app`)
 - **SSH Key:** `~/.ssh/hetzner_key`
+- **Reverse proxy:** nginx → localhost:3000
+- **SSL:** Let's Encrypt (certbot, auto-renews via systemd timer, works with Cloudflare proxy enabled)
+- **SSL cert path:** `/etc/letsencrypt/live/e-pdf.bg/fullchain.pem`
+- **nginx config:** `/etc/nginx/sites-available/epdf`
 
 ### Deployment Steps
 ```bash
@@ -88,25 +92,49 @@ rsync -avz --exclude='.git' --exclude='node_modules' --exclude='.next' \
 
 # 2. Copy all directories into Docker container
 ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "
-  docker cp /root/pdf-tools/components/. dc9f48b7cc4b:/app/components/ && \
-  docker cp /root/pdf-tools/styles/. dc9f48b7cc4b:/app/styles/ && \
-  docker cp /root/pdf-tools/pages/. dc9f48b7cc4b:/app/pages/ && \
-  docker cp /root/pdf-tools/hooks/. dc9f48b7cc4b:/app/hooks/ && \
-  docker cp /root/pdf-tools/helpers/. dc9f48b7cc4b:/app/helpers/ && \
-  docker cp /root/pdf-tools/public/. dc9f48b7cc4b:/app/public/ && \
-  docker exec dc9f48b7cc4b mkdir -p /app/data && \
-  docker cp /root/pdf-tools/data/ratings.json dc9f48b7cc4b:/app/data/ratings.json
+  docker cp /root/pdf-tools/components/. epdf-container:/app/components/ && \
+  docker cp /root/pdf-tools/styles/. epdf-container:/app/styles/ && \
+  docker cp /root/pdf-tools/pages/. epdf-container:/app/pages/ && \
+  docker cp /root/pdf-tools/hooks/. epdf-container:/app/hooks/ && \
+  docker cp /root/pdf-tools/helpers/. epdf-container:/app/helpers/ && \
+  docker cp /root/pdf-tools/public/. epdf-container:/app/public/ && \
+  docker exec epdf-container mkdir -p /app/data && \
+  docker cp /root/pdf-tools/data/ratings.json epdf-container:/app/data/ratings.json
 "
 
 # 3. Clear cache and rebuild
 ssh -i ~/.ssh/hetzner_key root@e-pdf.bg \
-  "docker exec dc9f48b7cc4b rm -rf /app/.next && docker exec dc9f48b7cc4b npm run build"
+  "docker exec epdf-container rm -rf /app/.next && docker exec epdf-container npm run build"
 
 # 4. Restart container
-ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "docker restart dc9f48b7cc4b"
+ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "docker restart epdf-container"
 ```
 
 > **Important:** Always use full rsync (step 1) + full docker cp (step 2) to avoid stale files in container after restart. The container does NOT persist files across recreation — only across `docker restart`.
+
+### SSL Renewal
+Certbot renews automatically (~30 days before expiry). **Cloudflare proxy can stay enabled** during renewal — Cloudflare passes `.well-known/acme-challenge/` directly to the server. To test manually:
+```bash
+ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "certbot renew --dry-run"
+```
+
+### Fresh Server Setup (if migrating again)
+```bash
+# 1. Install Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | tee /etc/apt/sources.list.d/docker.list
+apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io
+
+# 2. rsync + docker build + docker run (see Deployment Steps above)
+
+# 3. Install nginx + certbot
+apt-get install -y nginx certbot python3-certbot-nginx
+
+# 4. Issue SSL cert (Cloudflare proxy must be OFF / DNS only during this step)
+certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --email admin@e-pdf.bg --redirect
+
+# 5. Re-enable Cloudflare proxy (orange cloud)
+```
 
 ### GitHub
 - **Repo:** `FileSubmit/e-pdf.bg`
