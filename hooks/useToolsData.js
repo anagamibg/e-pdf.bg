@@ -358,6 +358,21 @@ const useToolsData = () => {
       URI: "/pdf-to-txt",
     },
 
+    PDFToEXCELTool: {
+      key: "PDFToExcel",
+      title: t("common:tool_name_pdf_to_excel"),
+      description: t("common:tool_desc_pdf_to_excel"),
+      href: "/pdf-to-excel",
+      icon: <FileEarmarkExcel />,
+      acceptedInputMimeType: "application/pdf",
+      acceptedInputFileMaxSize: 26214400,
+      newFileNameSuffix: "_PDFToExcel.xlsx",
+      outputFileMimeType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      thumbnailImageURL: "",
+      URI: "/pdf-to-excel",
+    },
+
     PDFToZIPTool: {
       key: "PDFToZIP",
       title: t("common:tool_name_pdf_to_zip"),

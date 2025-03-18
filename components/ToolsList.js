@@ -174,6 +174,12 @@ const ToolsList = React.memo(function ToolsList() {
         />
 
         <NavItem
+          title={toolsData["PDFToEXCELTool"].title}
+          url={toolsData["PDFToEXCELTool"].href}
+          icon={toolsData["PDFToEXCELTool"].icon}
+        />
+
+        <NavItem
           title={toolsData["PDFToZIPTool"].title}
           url={toolsData["PDFToZIPTool"].href}
           icon={toolsData["PDFToZIPTool"].icon}

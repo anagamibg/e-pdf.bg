@@ -489,6 +489,24 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/pdf-to-txt"/>
   </url>
   <url>
+    <loc>https://e-pdf.bg/pdf-to-excel</loc>
+    <lastmod>2026-02-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/pdf-to-excel"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/en/pdf-to-excel</loc>
+    <lastmod>2026-02-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/pdf-to-excel"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/pdf-to-excel"/>
+  </url>
+  <url>
     <loc>https://e-pdf.bg/pdf-to-zip</loc>
     <lastmod>2026-02-18</lastmod>
     <changefreq>monthly</changefreq>

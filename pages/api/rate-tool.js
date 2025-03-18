@@ -11,7 +11,7 @@ const VALID_TOOL_KEYS = new Set([
   "CompressPDF", "GrayscalePDF", "ExtractPages", "RepairPDF", "ProtectPDF",
   "UnlockPDF", "JPGToPDF", "PNGToPDF", "BMPToPDF", "TIFFToPDF", "WORDToPDF",
   "PPTXToPDF", "TXTToPDF", "EXCELToPDF", "PDFToJPG", "PDFToPNG", "PDFToBMP",
-  "PDFToTIFF", "PDFToWORD", "PDFToPPTX", "PDFToTXT", "PDFToZIP",
+  "PDFToTIFF", "PDFToWORD", "PDFToPPTX", "PDFToTXT", "PDFToExcel", "PDFToZIP",
 ]);
 
 // Serialize writes to prevent JSON corruption under concurrent requests

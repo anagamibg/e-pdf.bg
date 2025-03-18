@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-19
+
+### Added
+- **PDF to Excel tool** (`/pdf-to-excel`) — converts PDF documents to editable Excel XLSX spreadsheets using LibreOffice server-side conversion with `calc_pdf_import` filter
+  - Full bilingual support (BG/EN locale files)
+  - Star ratings and SEO schema integration
+  - Added to navigation dropdown, sitemap, and homepage tools grid
+
 ## [1.2.1] - 2026-02-19
 
 ### Fixed
