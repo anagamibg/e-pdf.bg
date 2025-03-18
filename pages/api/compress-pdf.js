@@ -84,7 +84,7 @@ const handler = async (req, res) => {
                     -dUCRandBGInfo=/Remove \
                     -sProcessColorModel=DeviceRGB  \
                     -dColorConversionStrategy=/RGB  \
-                    -dOmitInfoDate=true -dOmitID=true -dOmitXMP=true  \
+                    -dOmitInfoDate=true -dOmitXMP=true  \
                     -dPreserveAnnots=true -dPreserveMarkedContent=true \
                     -dPreserveCopyPage=false -dPreserveHalftoneInfo=false \
                     -dPreserveTrMode=false \
