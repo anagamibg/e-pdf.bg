@@ -46,8 +46,8 @@ const handler = async (req, res) => {
           );
           //check if originalFileData is not null
           if (originalFileData) {
-            //conversion command
-            const command = `soffice --headless --invisible --infilter="calc_pdf_import" --convert-to xlsx:"Calc MS Excel 2007 XML" --outdir ${file.pdfToolsFilesPath} ${file.inputFilePath}`;
+            //conversion command using python pdfplumber
+            const command = `python3 /app/scripts/pdf-to-excel.py ${file.inputFilePath} ${file.outputFilePath}`;
 
             //starting processing
             await filesRepo.runCommand(command, file.dataJSONPath);
