@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - 2026-02-19
 
 ### Added
-- **PDF to Excel tool** (`/pdf-to-excel`) — converts PDF documents to editable Excel XLSX spreadsheets using LibreOffice server-side conversion with `calc_pdf_import` filter
+- **PDF to Excel tool** (`/pdf-to-excel`) — converts PDF documents to editable Excel XLSX spreadsheets using Python pdfplumber + openpyxl for table extraction (LibreOffice cannot do PDF→Calc conversion)
   - Full bilingual support (BG/EN locale files)
   - Star ratings and SEO schema integration
   - Added to navigation dropdown, sitemap, and homepage tools grid
