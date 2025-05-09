@@ -47,7 +47,7 @@ const handler = async (req, res) => {
           //check if originalFileData is not null
           if (originalFileData) {
             //conversion command
-            const command = `soffice --headless --invisible --convert-to pdf:"calc_pdf_Export" --outdir ${file.pdfToolsFilesPath} ${file.inputFilePath}`;
+            const command = `python3 /app/scripts/fix-excel-row-heights.py ${file.inputFilePath} && soffice --headless --invisible --convert-to pdf:"calc_pdf_Export" --outdir ${file.pdfToolsFilesPath} ${file.inputFilePath}`;
             //starting processing
             await filesRepo.runCommand(command, file.dataJSONPath);
 

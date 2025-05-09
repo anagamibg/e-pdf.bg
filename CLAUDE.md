@@ -3,7 +3,7 @@
 ## Project Overview
 **e-pdf.bg** is a free online PDF tools web application built with Next.js. It allows users to merge, compress, convert, edit, protect, and unlock PDF files. The site supports Bulgarian (bg, default) and English (en) localization.
 
-**Version:** 1.3.0
+**Version:** 1.3.1
 **Live URL:** https://e-pdf.bg
 
 ## Tech Stack
@@ -12,7 +12,7 @@
 - **i18n:** next-i18next (bg default, en)
 - **PDF Processing:**
   - Client-side: `pdf-lib` v1.17.1 (text/image embedding), `react-pdf` v8.0.2 (rendering)
-  - Server-side: Ghostscript (compression, grayscale), qpdf (protect/unlock), LibreOffice (office conversions), Python pdfplumber+openpyxl (PDF→Excel)
+  - Server-side: Ghostscript (compression, grayscale), qpdf (protect/unlock), LibreOffice (office conversions), Python pdfplumber+openpyxl (PDF→Excel), Python openpyxl row-height fix (Excel→PDF pre-processing)
   - `pdfjs-dist` loaded from CDN (3.11.174) for PDF Editor canvas rendering
 - **File Handling:** formidable (uploads), jszip (zip), pdfkit (image→PDF)
 - **UI:** react-bootstrap-icons, react-toastify, react-dnd, react-selecto
@@ -30,7 +30,7 @@
 /public/locales/bg/  — Bulgarian translations (JSON per page)
 /public/locales/en/  — English translations (JSON per page)
 /public/img/         — Static images (logo, favicon, thumbnails)
-/scripts/            — Python helper scripts (pdf-to-excel.py)
+/scripts/            — Python helper scripts (pdf-to-excel.py, fix-excel-row-heights.py)
 ```
 
 ### Tool Registration Pattern
@@ -162,6 +162,7 @@ certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --emai
 | `styles/MegaMenu.module.css` | Header/navigation styles |
 | `next.config.js` | i18n config, env variables, image domains |
 | `scripts/pdf-to-excel.py` | Python script for PDF→XLSX conversion using pdfplumber + openpyxl |
+| `scripts/fix-excel-row-heights.py` | Pre-processes Excel files to fix row heights for wrapped text before LibreOffice PDF conversion |
 | `CHANGELOG.md` | Version history and release notes |
 
 ## CSS Variables (defined in global.css)
@@ -190,3 +191,4 @@ npm run lint   # ESLint
 - **Deployment gotcha:** Container loses custom files on recreation. Always run full rsync + docker cp before build (see Deployment Steps above).
 - **Digital signature compatibility:** `-dOmitID=true` must NOT be used in Ghostscript compression commands — it removes the PDF Document ID which is required by external digital signing services (Adobe Sign, Evrotrust, eID, etc.). The compress-pdf.js command uses `-dOmitXMP=true` but preserves the Document ID intentionally.
 - **PDF to Excel:** Uses Python `pdfplumber` + `openpyxl` (not LibreOffice — LO cannot convert Draw→Calc). Script at `scripts/pdf-to-excel.py`. Requires `pip3 install pdfplumber openpyxl --break-system-packages` inside the Docker container after recreation.
+- **Excel to PDF row height fix:** LibreOffice headless doesn't auto-adjust row heights for wrapped text in Calc cells, causing text overlap in PDF output. A Python pre-processing step (`scripts/fix-excel-row-heights.py`) uses openpyxl to calculate and set proper row heights before LibreOffice conversion. Handles both `.xlsx` (native) and `.xls` (converts to xlsx first via LibreOffice).
