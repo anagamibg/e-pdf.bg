@@ -84,6 +84,10 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const [eraserHexInput, setEraserHexInput] = useState("#ffffff");
   const eraserColorCanvasRef = useRef(null);
 
+  // Inline text editing state
+  const [editingText, setEditingText] = useState(null); // { pageIndex, elementIndex }
+  const textEditRef = useRef(null);
+
   // Load PDF and render pages
   useEffect(() => {
     if (!pdfDocument) return;
@@ -95,7 +99,12 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     if (pdfPages.length > 0) {
       renderCurrentPage();
     }
-  }, [currentPage, pageElements, selectedElement, pdfPages, scale]);
+  }, [currentPage, pageElements, selectedElement, pdfPages, scale, editingText]);
+
+  // Exit inline editing on page change
+  useEffect(() => {
+    if (editingText) setEditingText(null);
+  }, [currentPage]);
 
   // Sync hex input when fontColor changes
   useEffect(() => {
@@ -197,6 +206,11 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
 
       const elements = pageElements[currentPage] || [];
       elements.forEach((el, idx) => {
+        // Skip rendering text that is being edited inline
+        if (editingText && editingText.pageIndex === currentPage && editingText.elementIndex === idx) {
+          return;
+        }
+
         const isSelected =
           selectedElement !== null &&
           selectedElement.pageIndex === currentPage &&
@@ -300,7 +314,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       renderingRef.current = false;
     };
     img.src = page.imageData;
-  }, [currentPage, pageElements, selectedElement, pdfPages, scale]);
+  }, [currentPage, pageElements, selectedElement, pdfPages, scale, editingText]);
 
   const drawDeleteHandle = (ctx, x, y) => {
     ctx.fillStyle = "#ff4444";
@@ -400,6 +414,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   };
 
   const handleCanvasMouseDown = (e) => {
+    if (editingText) return;
     const { x, y } = getCanvasCoordinates(e);
 
     if (selectedElement) {
@@ -458,6 +473,20 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const handleCanvasMouseUp = () => {
     setIsDragging(false);
     setIsResizing(false);
+  };
+
+  const handleCanvasDoubleClick = (e) => {
+    const { x, y } = getCanvasCoordinates(e);
+    const found = findElementAtPosition(x, y);
+    if (found) {
+      const el = (pageElements[found.pageIndex] || [])[found.elementIndex];
+      if (el && el.type === "text") {
+        setEditingText(found);
+        setSelectedElement(null);
+        setActiveTool(null);
+        return;
+      }
+    }
   };
 
   const handleTouchStart = (e) => {
@@ -779,6 +808,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
 
   const handleSave = async () => {
     if (isProcessing) return;
+    if (editingText) setEditingText(null);
     setIsProcessing(true);
     try {
       const { PDFDocument, rgb } = await import("pdf-lib");
@@ -882,6 +912,55 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // Inline text edit helpers
+  const getTextEditStyle = () => {
+    if (!editingText) return {};
+    const el = (pageElements[editingText.pageIndex] || [])[editingText.elementIndex];
+    if (!el || el.type !== "text") return {};
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return {};
+    const canvasRect = canvas.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const cssScaleX = canvasRect.width / canvas.width;
+    const left = (canvasRect.left - containerRect.left + container.scrollLeft) + el.x * scale * 1.5 * cssScaleX;
+    const top = (canvasRect.top - containerRect.top + container.scrollTop) + el.y * scale * 1.5 * cssScaleX;
+    const fSize = el.fontSize * scale * 1.5 * cssScaleX;
+    const width = (el.width || 200) * scale * 1.5 * cssScaleX;
+    return {
+      position: "absolute",
+      left: `${left}px`,
+      top: `${top}px`,
+      fontSize: `${fSize}px`,
+      lineHeight: "1.3",
+      fontFamily: '"Open Sans", sans-serif',
+      fontWeight: el.bold ? "bold" : "normal",
+      fontStyle: el.italic ? "italic" : "normal",
+      color: el.color,
+      width: `${width}px`,
+      minHeight: `${fSize * 1.5}px`,
+    };
+  };
+
+  const handleEditingTextChange = (newText) => {
+    if (!editingText) return;
+    setPageElements((prev) => {
+      const elements = [...(prev[editingText.pageIndex] || [])];
+      elements[editingText.elementIndex] = { ...elements[editingText.elementIndex], text: newText };
+      return { ...prev, [editingText.pageIndex]: elements };
+    });
+  };
+
+  const finishEditing = () => {
+    if (!editingText) return;
+    const el = (pageElements[editingText.pageIndex] || [])[editingText.elementIndex];
+    // If text is empty after editing, remove the element
+    if (el && !el.text.trim()) {
+      handleDeleteElement(editingText.pageIndex, editingText.elementIndex);
+    }
+    setEditingText(null);
   };
 
   const hasElements = Object.values(pageElements).some((els) => els.length > 0);
@@ -990,6 +1069,9 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
             {activeTool === "text" && !isTextSelected && (
               <p className={styles.hint}>{t("edit-pdf:click_to_place")}</p>
             )}
+            {isTextSelected && !editingText && (
+              <p className={styles.hint}>{t("edit-pdf:edit_text_hint")}</p>
+            )}
           </div>
         )}
 
@@ -1082,6 +1164,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
           onMouseLeave={handleCanvasMouseUp}
+          onDoubleClick={handleCanvasDoubleClick}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -1089,6 +1172,27 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
             cursor: isDragging ? "grabbing" : isResizing ? "nwse-resize" : activeTool === "text" ? "text" : activeTool === "eraser" ? "crosshair" : activeTool === "signature" && signatureReady ? "copy" : "default",
           }}
         />
+        {editingText && (() => {
+          const el = (pageElements[editingText.pageIndex] || [])[editingText.elementIndex];
+          if (!el || el.type !== "text") return null;
+          return (
+            <textarea
+              ref={textEditRef}
+              className={styles.text_edit_overlay}
+              style={getTextEditStyle()}
+              value={el.text}
+              onChange={(e) => handleEditingTextChange(e.target.value)}
+              onBlur={finishEditing}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  finishEditing();
+                }
+              }}
+              autoFocus
+            />
+          );
+        })()}
       </div>
 
       {/* Page navigation */}

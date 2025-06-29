@@ -278,6 +278,20 @@
   overflow: auto;
   min-height: 500px;
   max-height: 70vh;
+  position: relative;
+}
+
+.text_edit_overlay {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px dashed #2563eb;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  z-index: 10;
+  padding: 0 2px;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .canvas {
