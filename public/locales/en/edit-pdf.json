@@ -41,5 +41,7 @@
   "sign_hint": "Draw your signature with the mouse, then click on the page to place it",
   "clear_signature": "Clear",
   "place_signature": "Place Signature",
-  "edit_text_hint": "Double-click to edit text"
+  "edit_text_hint": "Click on text to edit",
+  "editing_text_hint": "Click elsewhere to confirm. Escape to cancel.",
+  "font_family": "Font"
 }

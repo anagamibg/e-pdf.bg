@@ -20,6 +20,101 @@ import styles from "../styles/PDFEditor.module.css";
 const PDFJS_VERSION = "3.11.174";
 const PDFJS_CDN = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}`;
 
+// ── Font configuration for PDF text editing ─────────────────────────────
+const FONT_FAMILIES = {
+  "Liberation Sans": {
+    regular: "/fonts/LiberationSans-Regular.ttf",
+    bold: "/fonts/LiberationSans-Bold.ttf",
+    italic: "/fonts/LiberationSans-Italic.ttf",
+    boldItalic: "/fonts/LiberationSans-BoldItalic.ttf",
+    cssFamily: '"Liberation Sans", Arial, Helvetica, sans-serif',
+  },
+  "Liberation Serif": {
+    regular: "/fonts/LiberationSerif-Regular.ttf",
+    bold: "/fonts/LiberationSerif-Bold.ttf",
+    italic: "/fonts/LiberationSerif-Italic.ttf",
+    boldItalic: "/fonts/LiberationSerif-BoldItalic.ttf",
+    cssFamily: '"Liberation Serif", "Times New Roman", Times, serif',
+  },
+  "Liberation Mono": {
+    regular: "/fonts/LiberationMono-Regular.ttf",
+    bold: "/fonts/LiberationMono-Bold.ttf",
+    italic: "/fonts/LiberationMono-Italic.ttf",
+    boldItalic: "/fonts/LiberationMono-BoldItalic.ttf",
+    cssFamily: '"Liberation Mono", "Courier New", Courier, monospace',
+  },
+  "Open Sans": {
+    regular: "/fonts/OpenSans-Regular.ttf",
+    bold: "/fonts/LiberationSans-Bold.ttf",
+    italic: "/fonts/OpenSans-Italic.ttf",
+    boldItalic: "/fonts/LiberationSans-BoldItalic.ttf",
+    cssFamily: '"Open Sans", sans-serif',
+  },
+  "Calibri": {
+    regular: "/fonts/calibri.ttf",
+    bold: "/fonts/calibrib.ttf",
+    italic: "/fonts/calibrii.ttf",
+    boldItalic: "/fonts/calibriz.ttf",
+    cssFamily: 'Calibri, "Liberation Sans", Arial, sans-serif',
+  },
+};
+
+const PDF_FONT_MAP = {
+  "serif": "Liberation Serif",
+  "sans-serif": "Liberation Sans",
+  "monospace": "Liberation Mono",
+  "helvetica": "Liberation Sans",
+  "arial": "Liberation Sans",
+  "times": "Liberation Serif",
+  "times new roman": "Liberation Serif",
+  "courier": "Liberation Mono",
+  "courier new": "Liberation Mono",
+  "calibri": "Calibri",
+  "open sans": "Open Sans",
+};
+
+const resolveFontFamily = (pdfFontFamily) => {
+  if (!pdfFontFamily) return "Liberation Sans";
+  const lower = pdfFontFamily.toLowerCase().trim();
+  if (PDF_FONT_MAP[lower]) return PDF_FONT_MAP[lower];
+  for (const [key, value] of Object.entries(PDF_FONT_MAP)) {
+    if (lower.includes(key)) return value;
+  }
+  return "Liberation Sans";
+};
+
+let canvasFontsLoaded = false;
+const loadCanvasFonts = async () => {
+  if (canvasFontsLoaded) return;
+  const fontsToLoad = [
+    { name: "Liberation Sans", url: "/fonts/LiberationSans-Regular.ttf", weight: "normal", style: "normal" },
+    { name: "Liberation Sans", url: "/fonts/LiberationSans-Bold.ttf", weight: "bold", style: "normal" },
+    { name: "Liberation Sans", url: "/fonts/LiberationSans-Italic.ttf", weight: "normal", style: "italic" },
+    { name: "Liberation Sans", url: "/fonts/LiberationSans-BoldItalic.ttf", weight: "bold", style: "italic" },
+    { name: "Liberation Serif", url: "/fonts/LiberationSerif-Regular.ttf", weight: "normal", style: "normal" },
+    { name: "Liberation Serif", url: "/fonts/LiberationSerif-Bold.ttf", weight: "bold", style: "normal" },
+    { name: "Liberation Serif", url: "/fonts/LiberationSerif-Italic.ttf", weight: "normal", style: "italic" },
+    { name: "Liberation Serif", url: "/fonts/LiberationSerif-BoldItalic.ttf", weight: "bold", style: "italic" },
+    { name: "Liberation Mono", url: "/fonts/LiberationMono-Regular.ttf", weight: "normal", style: "normal" },
+    { name: "Liberation Mono", url: "/fonts/LiberationMono-Bold.ttf", weight: "bold", style: "normal" },
+    { name: "Liberation Mono", url: "/fonts/LiberationMono-Italic.ttf", weight: "normal", style: "italic" },
+    { name: "Calibri", url: "/fonts/calibri.ttf", weight: "normal", style: "normal" },
+    { name: "Calibri", url: "/fonts/calibrib.ttf", weight: "bold", style: "normal" },
+    { name: "Calibri", url: "/fonts/calibrii.ttf", weight: "normal", style: "italic" },
+  ];
+  const promises = fontsToLoad.map(async (f) => {
+    try {
+      const face = new FontFace(f.name, `url(${f.url})`, { weight: f.weight, style: f.style });
+      await face.load();
+      document.fonts.add(face);
+    } catch (e) {
+      console.warn(`Failed to load font: ${f.name} ${f.weight} ${f.style}`, e);
+    }
+  });
+  await Promise.all(promises);
+  canvasFontsLoaded = true;
+};
+
 let pdfjsPromise = null;
 const loadPdfJs = () => {
   if (pdfjsPromise) return pdfjsPromise;
@@ -47,6 +142,9 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   const signCanvasRef = useRef(null);
+  const textLayerRef = useRef(null);
+  const pageWrapperRef = useRef(null);
+  const dragOccurredRef = useRef(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageElements, setPageElements] = useState({});
@@ -84,8 +182,16 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const [eraserHexInput, setEraserHexInput] = useState("#ffffff");
   const eraserColorCanvasRef = useRef(null);
 
-  // Inline text editing state
-  const [editingText, setEditingText] = useState(null); // { pageIndex, elementIndex }
+  // Font family state
+  const [selectedFontFamily, setSelectedFontFamily] = useState("Open Sans");
+
+  // Text layer editing state
+  const [editingSpanIndex, setEditingSpanIndex] = useState(null);
+  const [editingBgColor, setEditingBgColor] = useState("#ffffff"); // sampled background color for cover rect
+  const toolbarClickRef = useRef(false); // true when mousedown happened in toolbar
+
+  // Inline text editing state for user-added text (canvas-based)
+  const [editingText, setEditingText] = useState(null);
   const textEditRef = useRef(null);
 
   // Load PDF and render pages
@@ -99,11 +205,22 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     if (pdfPages.length > 0) {
       renderCurrentPage();
     }
-  }, [currentPage, pageElements, selectedElement, pdfPages, scale, editingText]);
+  }, [currentPage, pageElements, selectedElement, pdfPages, scale, editingText, editingSpanIndex]);
+
+  // Build text layer after canvas render
+  useEffect(() => {
+    if (pdfPages.length > 0) {
+      requestAnimationFrame(() => buildTextLayer());
+    }
+  }, [currentPage, pageElements, pdfPages, scale, editingSpanIndex, activeTool]);
 
   // Exit inline editing on page change
   useEffect(() => {
     if (editingText) setEditingText(null);
+    if (editingSpanIndex !== null) {
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+      setEditingSpanIndex(null);
+    }
   }, [currentPage]);
 
   // Sync hex input when fontColor changes
@@ -115,12 +232,13 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   useEffect(() => {
     if (selectedElement) {
       const el = (pageElements[selectedElement.pageIndex] || [])[selectedElement.elementIndex];
-      if (el && el.type === "text") {
+      if (el && (el.type === "text" || el.type === "pdfText")) {
         setFontSize(el.fontSize);
         setFontColor(el.color);
         setIsBold(el.bold || false);
         setIsItalic(el.italic || false);
         setIsUnderline(el.underline || false);
+        setSelectedFontFamily(el.fontFamily || "Open Sans");
         setActiveTool("text");
       }
     }
@@ -140,17 +258,36 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     }
   }, [activeTool]);
 
+  // ResizeObserver to keep text layer in sync with canvas display size
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const observer = new ResizeObserver(() => {
+      const textLayerEl = textLayerRef.current;
+      if (!textLayerEl || !canvas.width) return;
+      const cssScale = canvas.getBoundingClientRect().width / canvas.width;
+      textLayerEl.style.transform = `scale(${cssScale})`;
+      textLayerEl.style.transformOrigin = "top left";
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [pdfPages, currentPage]);
+
   const loadPDF = async () => {
     try {
       const pdfjsLib = await loadPdfJs();
+      await loadCanvasFonts();
       const arrayBuffer = await pdfDocument.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       setTotalPages(pdf.numPages);
 
       const pages = [];
+      const extractedElements = {};
+
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 1.5 });
+        const viewport1 = page.getViewport({ scale: 1 });
 
         const offscreen = document.createElement("canvas");
         offscreen.width = viewport.width;
@@ -163,12 +300,124 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           imageData: offscreen.toDataURL("image/png"),
           width: viewport.width,
           height: viewport.height,
-          originalWidth: page.getViewport({ scale: 1 }).width,
-          originalHeight: page.getViewport({ scale: 1 }).height,
+          originalWidth: viewport1.width,
+          originalHeight: viewport1.height,
         });
+
+        // Extract text content and colors from the page
+        const textContent = await page.getTextContent();
+        const pageIndex = i - 1;
+        extractedElements[pageIndex] = [];
+
+        // Extract text fill colors from operator list
+        let textColors = [];
+        try {
+          const ops = await page.getOperatorList();
+          const OPS = pdfjsLib.OPS;
+          let fillColor = [0, 0, 0]; // default black
+          const stateStack = [];
+          let textColorIndex = 0;
+
+          for (let fi = 0; fi < ops.fnArray.length; fi++) {
+            const fn = ops.fnArray[fi];
+            const args = ops.argsArray[fi];
+
+            switch (fn) {
+              case OPS.setFillRGBColor:
+                fillColor = [args[0], args[1], args[2]]; // 0-1 range
+                break;
+              case OPS.setFillGray:
+                fillColor = [args[0], args[0], args[0]]; // grayscale
+                break;
+              case OPS.setFillCMYKColor:
+                // CMYK to RGB approximate conversion
+                if (args.length >= 4) {
+                  const c = args[0], m = args[1], y2 = args[2], k = args[3];
+                  fillColor = [(1 - c) * (1 - k), (1 - m) * (1 - k), (1 - y2) * (1 - k)];
+                }
+                break;
+              case OPS.save:
+                stateStack.push([...fillColor]);
+                break;
+              case OPS.restore:
+                if (stateStack.length > 0) fillColor = stateStack.pop();
+                break;
+              case OPS.showText:
+              case OPS.showSpacedText:
+                // Record the fill color for this text operation
+                textColors.push([...fillColor]);
+                break;
+            }
+          }
+        } catch (e) {
+          console.warn("Could not extract text colors:", e);
+        }
+
+        // Build text items and assign colors
+        let textOpIndex = 0;
+        for (const item of textContent.items) {
+          if (!item.str || !item.str.trim()) {
+            // Even empty items correspond to text operations, advance counter
+            textOpIndex++;
+            continue;
+          }
+          const t = item.transform;
+          // Skip rotated/skewed text
+          if (Math.abs(t[1]) > 0.01 || Math.abs(t[2]) > 0.01) {
+            textOpIndex++;
+            continue;
+          }
+
+          const itemFontSize = Math.abs(t[3]) || Math.sqrt(t[0] * t[0] + t[1] * t[1]);
+          if (itemFontSize < 1) {
+            textOpIndex++;
+            continue;
+          }
+          const x = t[4];
+          // t[5] is the baseline from bottom of page; convert to top-of-text from top of page
+          const y = viewport1.height - t[5] - itemFontSize;
+
+          // Get color from operator list (0-1 range → hex)
+          let color = "#000000";
+          if (textColors.length > 0 && textOpIndex < textColors.length) {
+            const c = textColors[textOpIndex];
+            const r = Math.round(Math.min(1, Math.max(0, c[0])) * 255);
+            const g = Math.round(Math.min(1, Math.max(0, c[1])) * 255);
+            const b = Math.round(Math.min(1, Math.max(0, c[2])) * 255);
+            color = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`.toUpperCase();
+          }
+          textOpIndex++;
+
+          const styleInfo = textContent.styles[item.fontName] || {};
+          const fontFamily = resolveFontFamily(styleInfo.fontFamily);
+          const itemIsItalic = styleInfo.italic || false;
+          const itemIsBold = item.fontName ? /bold|black|heavy/i.test(item.fontName) : false;
+
+          extractedElements[pageIndex].push({
+            type: "pdfText",
+            text: item.str,
+            originalText: item.str,
+            x,
+            y,
+            originalX: x,
+            originalY: y,
+            fontSize: itemFontSize,
+            originalFontSize: itemFontSize,
+            color,
+            originalColor: color,
+            fontFamily,
+            bold: itemIsBold,
+            italic: itemIsItalic,
+            underline: false,
+            width: item.width || itemFontSize * item.str.length * 0.6,
+            height: item.height || itemFontSize,
+            modified: false,
+          });
+        }
       }
 
       setPdfPages(pages);
+      setPageElements(extractedElements);
       if (pages.length > 0) {
         setPageDimensions({ width: pages[0].width, height: pages[0].height });
       }
@@ -180,9 +429,144 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const buildFontString = (el, scaleMul) => {
     const style = el.italic ? "italic" : "normal";
     const weight = el.bold ? "bold" : "normal";
-    return `${style} ${weight} ${el.fontSize * scaleMul}px "Open Sans", sans-serif`;
+    const fontConfig = FONT_FAMILIES[el.fontFamily] || FONT_FAMILIES["Open Sans"];
+    return `${style} ${weight} ${el.fontSize * scaleMul}px ${fontConfig.cssFamily}`;
   };
 
+  // ── Build HTML text layer with spans over PDF text ──────────────────────
+  const buildTextLayer = useCallback(() => {
+    const textLayerEl = textLayerRef.current;
+    const canvas = canvasRef.current;
+    if (!textLayerEl || !canvas || !canvas.width) return;
+
+    const elements = pageElements[currentPage] || [];
+    const scaleMul = scale * 1.5;
+
+    // Size the text layer to match the canvas pixel buffer
+    textLayerEl.style.width = `${canvas.width}px`;
+    textLayerEl.style.height = `${canvas.height}px`;
+    const cssScale = canvas.getBoundingClientRect().width / canvas.width;
+    textLayerEl.style.transform = `scale(${cssScale})`;
+    textLayerEl.style.transformOrigin = "top left";
+
+    // Clear existing spans
+    textLayerEl.innerHTML = "";
+
+    const isToolActive = activeTool && activeTool !== "text";
+
+    elements.forEach((el, idx) => {
+      if (el.type !== "pdfText") return;
+
+      const span = document.createElement("span");
+      span.dataset.idx = String(idx);
+      span.textContent = el.text;
+
+      const left = el.x * scaleMul;
+      const top = el.y * scaleMul;
+      const fSize = el.fontSize * scaleMul;
+      const width = el.width * scaleMul;
+      const height = el.fontSize * scaleMul * 1.3;
+      const fontConfig = FONT_FAMILIES[el.fontFamily] || FONT_FAMILIES["Liberation Sans"];
+
+      span.style.cssText = `
+        position: absolute;
+        left: ${left}px;
+        top: ${top}px;
+        font-size: ${fSize}px;
+        line-height: 1.3;
+        font-family: ${fontConfig.cssFamily};
+        font-weight: ${el.bold ? "bold" : "normal"};
+        font-style: ${el.italic ? "italic" : "normal"};
+        color: transparent;
+        white-space: pre;
+        cursor: text;
+        pointer-events: ${isToolActive ? "none" : "auto"};
+        min-width: ${width}px;
+        min-height: ${height}px;
+        border-radius: 2px;
+        transition: background 0.1s ease;
+      `;
+
+      // Modified text — show visibly
+      if (el.modified) {
+        span.style.color = el.color;
+        if (el.underline) {
+          span.style.textDecoration = "underline";
+        }
+      }
+
+      // Editing state — single click enters edit mode directly
+      if (editingSpanIndex === idx) {
+        span.contentEditable = "true";
+        span.style.color = el.color;
+        // Use sampled background color so span blends with the page background
+        // Canvas has a cover rect in the same color, so only the span text is visible
+        const bgCol = el.bgColor || editingBgColor || "#ffffff";
+        span.style.background = bgCol;
+        span.style.outline = "2px solid #2563eb";
+        span.style.outlineOffset = "1px";
+        span.style.cursor = "text";
+        span.style.caretColor = el.color === "#FFFFFF" || el.color === "#ffffff" ? "#2563eb" : el.color;
+        span.style.zIndex = "10";
+        span.style.minWidth = `${Math.max(width, fSize * 2)}px`;
+        span.style.pointerEvents = "auto";
+        if (el.underline) {
+          span.style.textDecoration = "underline";
+        }
+
+        // Add delete button on editing span
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = "&times;";
+        deleteBtn.style.cssText = `
+          position: absolute;
+          top: -12px;
+          right: -12px;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: #ff4444;
+          color: #fff;
+          border: 2px solid #fff;
+          font-size: 14px;
+          font-weight: bold;
+          line-height: 1;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: auto;
+          z-index: 20;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          padding: 0;
+        `;
+        deleteBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleDeleteElement(currentPage, idx);
+        });
+        span.appendChild(deleteBtn);
+      }
+
+      textLayerEl.appendChild(span);
+    });
+
+    // Focus editing span after DOM update
+    if (editingSpanIndex !== null) {
+      requestAnimationFrame(() => {
+        const editSpan = textLayerEl.querySelector(`span[data-idx="${editingSpanIndex}"]`);
+        if (editSpan && document.activeElement !== editSpan) {
+          editSpan.focus();
+          // Select all text for easy editing
+          const range = document.createRange();
+          range.selectNodeContents(editSpan);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      });
+    }
+  }, [currentPage, pageElements, scale, editingSpanIndex, activeTool, editingBgColor]);
+
+  // ── Canvas rendering ──────────────────────────────────────────────────
   const renderCurrentPage = useCallback(() => {
     if (renderingRef.current) return;
     renderingRef.current = true;
@@ -206,7 +590,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
 
       const elements = pageElements[currentPage] || [];
       elements.forEach((el, idx) => {
-        // Skip rendering text that is being edited inline
+        // Skip rendering user-text that is being edited inline
         if (editingText && editingText.pageIndex === currentPage && editingText.elementIndex === idx) {
           return;
         }
@@ -308,13 +692,31 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
             }
           };
           elImg.src = el.dataUrl;
+        } else if (el.type === "pdfText") {
+          // Draw cover rect for BOTH modified AND currently-editing text
+          // This hides the canvas-rendered text so only the HTML span is visible
+          const isBeingEdited = editingSpanIndex === idx;
+          if (!el.modified && !isBeingEdited) return;
+
+          const scaleMul = scale * 1.5;
+          const pad = 2;
+          // Use stored bgColor if available (sampled background), otherwise white
+          const coverColor = el.bgColor || "#ffffff";
+          ctx.fillStyle = coverColor;
+          ctx.fillRect(
+            (el.originalX - pad) * scaleMul,
+            (el.originalY - pad) * scaleMul,
+            (el.width + pad * 2) * scaleMul,
+            (el.originalFontSize * 1.3 + pad * 2) * scaleMul
+          );
+          // Text is shown by the HTML text layer span, not canvas
         }
       });
 
       renderingRef.current = false;
     };
     img.src = page.imageData;
-  }, [currentPage, pageElements, selectedElement, pdfPages, scale, editingText]);
+  }, [currentPage, pageElements, selectedElement, pdfPages, scale, editingText, editingSpanIndex]);
 
   const drawDeleteHandle = (ctx, x, y) => {
     ctx.fillStyle = "#ff4444";
@@ -359,6 +761,59 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     return lines;
   };
 
+  // ── Sample background color from canvas at a text position ───────────
+  const sampleBackgroundColor = useCallback((el) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return "#ffffff";
+    const ctx = canvas.getContext("2d");
+    const scaleMul = scale * 1.5;
+    // Sample a small strip above and below the text baseline area
+    const x = Math.round(el.x * scaleMul);
+    const y = Math.round(el.y * scaleMul);
+    const w = Math.round((el.width || el.fontSize * el.text.length * 0.6) * scaleMul);
+    const h = Math.round(el.fontSize * scaleMul * 1.3);
+
+    if (w <= 0 || h <= 0 || x < 0 || y < 0) return "#ffffff";
+
+    // Sample a few pixels from the left edge of the text area (likely background, not text)
+    // We'll sample from the top-left corner area which is less likely to contain text
+    const samplePoints = [];
+    // Sample from top edge (above text baseline)
+    for (let sx = x; sx < Math.min(x + 5, canvas.width); sx++) {
+      if (y >= 0 && y < canvas.height) samplePoints.push({ x: sx, y: y });
+    }
+    // Sample from left edge
+    for (let sy = y; sy < Math.min(y + Math.min(h, 5), canvas.height); sy++) {
+      if (x >= 0 && x < canvas.width) samplePoints.push({ x: x, y: sy });
+    }
+    // Also sample a few pixels to the right of the text area (likely pure background)
+    const rightX = Math.min(x + w + 2, canvas.width - 1);
+    for (let sy = y; sy < Math.min(y + Math.min(h, 5), canvas.height); sy++) {
+      if (rightX >= 0 && rightX < canvas.width) samplePoints.push({ x: rightX, y: sy });
+    }
+
+    if (samplePoints.length === 0) return "#ffffff";
+
+    let rSum = 0, gSum = 0, bSum = 0, count = 0;
+    for (const pt of samplePoints) {
+      try {
+        const pixel = ctx.getImageData(pt.x, pt.y, 1, 1).data;
+        rSum += pixel[0];
+        gSum += pixel[1];
+        bSum += pixel[2];
+        count++;
+      } catch (e) { /* canvas security error, ignore */ }
+    }
+
+    if (count === 0) return "#ffffff";
+
+    const r = Math.round(rSum / count);
+    const g = Math.round(gSum / count);
+    const b = Math.round(bSum / count);
+    return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  }, [scale]);
+
+  // ── Canvas coordinate conversion ──────────────────────────────────────
   const getCanvasCoordinates = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -370,6 +825,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     };
   };
 
+  // Find non-pdfText elements at position (pdfText is handled by text layer)
   const findElementAtPosition = (x, y) => {
     const elements = pageElements[currentPage] || [];
     for (let i = elements.length - 1; i >= 0; i--) {
@@ -413,13 +869,14 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     return Math.abs(x - handleX) < 10 && Math.abs(y - handleY) < 10;
   };
 
+  // ── Canvas mouse/touch handlers (for non-pdfText elements) ────────────
   const handleCanvasMouseDown = (e) => {
     if (editingText) return;
     const { x, y } = getCanvasCoordinates(e);
 
     if (selectedElement) {
       const el = (pageElements[selectedElement.pageIndex] || [])[selectedElement.elementIndex];
-      if (el && isOnDeleteHandle(x, y, el)) {
+      if (el && el.type !== "pdfText" && isOnDeleteHandle(x, y, el)) {
         handleDeleteElement(selectedElement.pageIndex, selectedElement.elementIndex);
         return;
       }
@@ -434,10 +891,13 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     if (found) {
       const el = (pageElements[found.pageIndex] || [])[found.elementIndex];
       setSelectedElement(found);
+      // Don't clear editingSpanIndex here — blur handler on contentEditable span
+      // will fire when focus leaves, committing changes and clearing editingSpanIndex
       setIsDragging(true);
       setDragOffset({ x: x - el.x, y: y - el.y });
     } else {
       setSelectedElement(null);
+      // Don't clear editingSpanIndex here — let blur handler do it
       if (activeTool === "text" && textInput.trim()) {
         addTextElement(x, y);
       } else if (activeTool === "eraser") {
@@ -452,6 +912,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     if (isDragging && selectedElement) {
       const { x, y } = getCanvasCoordinates(e);
       updateElementPosition(selectedElement.pageIndex, selectedElement.elementIndex, x - dragOffset.x, y - dragOffset.y);
+      return;
     }
     if (isResizing && selectedElement) {
       const { x, y } = getCanvasCoordinates(e);
@@ -476,6 +937,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   };
 
   const handleCanvasDoubleClick = (e) => {
+    // Only handle double-click for user-added text elements
     const { x, y } = getCanvasCoordinates(e);
     const found = findElementAtPosition(x, y);
     if (found) {
@@ -506,6 +968,177 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     handleCanvasMouseUp();
   };
 
+  // ── Text layer event handlers ─────────────────────────────────────────
+  const handleTextLayerClick = useCallback((e) => {
+    // Don't interfere with delete button clicks
+    if (e.target.tagName === "BUTTON") return;
+    // If a drag just occurred, skip (don't enter edit mode after drag)
+    if (dragOccurredRef.current) { dragOccurredRef.current = false; return; }
+
+    const span = e.target.closest("span[data-idx]");
+    if (!span) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const idx = parseInt(span.dataset.idx);
+    const el = (pageElements[currentPage] || [])[idx];
+    if (!el) return;
+
+    // If already editing this span, let browser handle cursor placement
+    if (editingSpanIndex === idx) return;
+
+    // Sample background color from canvas BEFORE we draw the cover rect
+    // For modified text, use previously stored bgColor; for unmodified, sample now
+    if (!el.modified) {
+      const sampledBg = sampleBackgroundColor(el);
+      setEditingBgColor(sampledBg);
+      // Store the sampled bg color on the element so cover rect can use it
+      setPageElements((prev) => {
+        const elements = [...(prev[currentPage] || [])];
+        elements[idx] = { ...elements[idx], bgColor: sampledBg };
+        return { ...prev, [currentPage]: elements };
+      });
+    } else {
+      setEditingBgColor(el.bgColor || "#ffffff");
+    }
+
+    // Single click enters edit mode directly (Sejda-style)
+    setEditingSpanIndex(idx);
+    setSelectedElement(null);
+    setEditingText(null);
+    setActiveTool(null);
+
+    // Load font properties into toolbar
+    setFontSize(el.fontSize);
+    setFontColor(el.color);
+    setIsBold(el.bold || false);
+    setIsItalic(el.italic || false);
+    setIsUnderline(el.underline || false);
+    setSelectedFontFamily(el.fontFamily || "Liberation Sans");
+  }, [currentPage, pageElements, editingSpanIndex, sampleBackgroundColor]);
+
+  const blurTimeoutRef = useRef(null);
+
+  const handleTextLayerBlur = useCallback((e) => {
+    if (editingSpanIndex === null) return;
+    const span = e.target.closest("span[data-idx]");
+    if (!span) return;
+    const idx = parseInt(span.dataset.idx);
+    if (idx !== editingSpanIndex) return;
+
+    // Delay the commit — if the user clicked on toolbar controls (bold, font, color, etc.)
+    // the toolbarClickRef will be true and we refocus the span instead of committing.
+    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+
+    blurTimeoutRef.current = setTimeout(() => {
+      // If mousedown happened in toolbar area, refocus span and stay in editing mode
+      if (toolbarClickRef.current) {
+        toolbarClickRef.current = false;
+        if (span.isConnected) span.focus();
+        return;
+      }
+
+      const newText = span.textContent.replace(/\u00d7$/, ""); // strip × from delete btn if present
+      const el = (pageElements[currentPage] || [])[idx];
+      if (!el) return;
+
+      // Compare against originalText to determine if truly changed from source
+      if (newText !== el.originalText) {
+        setPageElements((prev) => {
+          const elements = [...(prev[currentPage] || [])];
+          elements[idx] = { ...elements[idx], text: newText, modified: true };
+          return { ...prev, [currentPage]: elements };
+        });
+      } else if (!el.modified) {
+        // Text matches original and wasn't modified by toolbar — clean up bgColor
+        // so the canvas cover rect disappears and original rendering shows through
+        setPageElements((prev) => {
+          const elements = [...(prev[currentPage] || [])];
+          const { bgColor, ...rest } = elements[idx];
+          elements[idx] = rest;
+          return { ...prev, [currentPage]: elements };
+        });
+      }
+
+      setEditingSpanIndex(null);
+    }, 100);
+  }, [editingSpanIndex, currentPage, pageElements]);
+
+  const handleTextLayerKeyDown = useCallback((e) => {
+    if (e.key === "Escape" && editingSpanIndex !== null) {
+      e.preventDefault();
+      // Cancel any pending blur commit
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+      const span = e.target.closest("span[data-idx]");
+      if (span) {
+        const el = (pageElements[currentPage] || [])[editingSpanIndex];
+        if (el) {
+          span.textContent = el.text;
+          // If text was not modified, remove bgColor so canvas cover disappears
+          if (!el.modified) {
+            setPageElements((prev) => {
+              const elements = [...(prev[currentPage] || [])];
+              const { bgColor, ...rest } = elements[editingSpanIndex];
+              elements[editingSpanIndex] = rest;
+              return { ...prev, [currentPage]: elements };
+            });
+          }
+        }
+      }
+      setEditingSpanIndex(null);
+    }
+  }, [editingSpanIndex, currentPage, pageElements]);
+
+  // Drag-to-move for pdfText spans (only modified elements can be dragged)
+  const handleTextLayerMouseDown = useCallback((e) => {
+    const span = e.target.closest("span[data-idx]");
+    if (!span) return;
+    // Don't interfere with delete button
+    if (e.target.tagName === "BUTTON") return;
+
+    const idx = parseInt(span.dataset.idx);
+    // If this span is currently being edited, let browser handle text selection
+    if (editingSpanIndex === idx) return;
+
+    const el = (pageElements[currentPage] || [])[idx];
+    if (!el) return;
+    // Only allow drag for modified elements (unmodified go straight to edit on click)
+    if (!el.modified) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const origElX = el.x;
+    const origElY = el.y;
+    let moved = false;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const cssScaleVal = canvasRect.width / canvas.width;
+    const scaleMul = scale * 1.5;
+
+    const onMouseMove = (moveEvent) => {
+      const dx = (moveEvent.clientX - startX) / (cssScaleVal * scaleMul);
+      const dy = (moveEvent.clientY - startY) / (cssScaleVal * scaleMul);
+      if (Math.abs(moveEvent.clientX - startX) > 3 || Math.abs(moveEvent.clientY - startY) > 3) {
+        moved = true;
+        dragOccurredRef.current = true;
+      }
+      if (moved) {
+        updateElementPosition(currentPage, idx, origElX + dx, origElY + dy);
+      }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, [currentPage, pageElements, scale, editingSpanIndex]);
+
+  // ── Element management ────────────────────────────────────────────────
   const addTextElement = (x, y) => {
     const newElement = {
       type: "text",
@@ -514,6 +1147,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       y,
       fontSize,
       color: fontColor,
+      fontFamily: selectedFontFamily,
       bold: isBold,
       italic: isItalic,
       underline: isUnderline,
@@ -580,7 +1214,6 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       ...prev,
       [currentPage]: [...(prev[currentPage] || []), newElement],
     }));
-    // Clear signature canvas after placing
     const ctx = signCanvas.getContext("2d");
     ctx.clearRect(0, 0, signCanvas.width, signCanvas.height);
     setSignatureReady(false);
@@ -590,7 +1223,10 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const updateElementPosition = (pageIndex, elementIndex, x, y) => {
     setPageElements((prev) => {
       const elements = [...(prev[pageIndex] || [])];
-      elements[elementIndex] = { ...elements[elementIndex], x, y };
+      const el = elements[elementIndex];
+      const updates = { x, y };
+      if (el.type === "pdfText") updates.modified = true;
+      elements[elementIndex] = { ...el, ...updates };
       return { ...prev, [pageIndex]: elements };
     });
   };
@@ -606,11 +1242,26 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const updateSelectedTextProp = (prop, value) => {
     if (!selectedElement) return;
     const el = (pageElements[selectedElement.pageIndex] || [])[selectedElement.elementIndex];
-    if (!el || el.type !== "text") return;
+    if (!el || (el.type !== "text" && el.type !== "pdfText")) return;
     setPageElements((prev) => {
       const elements = [...(prev[selectedElement.pageIndex] || [])];
-      elements[selectedElement.elementIndex] = { ...elements[selectedElement.elementIndex], [prop]: value };
+      const cur = elements[selectedElement.elementIndex];
+      const updates = { [prop]: value };
+      if (cur.type === "pdfText") updates.modified = true;
+      elements[selectedElement.elementIndex] = { ...cur, ...updates };
       return { ...prev, [selectedElement.pageIndex]: elements };
+    });
+  };
+
+  // Update property on the currently editing pdfText span
+  const updateEditingSpanProp = (prop, value) => {
+    if (editingSpanIndex === null) return;
+    setPageElements((prev) => {
+      const elements = [...(prev[currentPage] || [])];
+      const cur = elements[editingSpanIndex];
+      if (!cur || cur.type !== "pdfText") return prev;
+      elements[editingSpanIndex] = { ...cur, [prop]: value, modified: true };
+      return { ...prev, [currentPage]: elements };
     });
   };
 
@@ -621,6 +1272,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       return { ...prev, [pageIndex]: elements };
     });
     setSelectedElement(null);
+    setEditingSpanIndex(null);
   };
 
   const handleImageUpload = (e) => {
@@ -677,7 +1329,6 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     e.preventDefault();
     signDrawingRef.current = false;
     lastSignPoint.current = null;
-    // Check if anything drawn
     const canvas = signCanvasRef.current;
     const ctx = canvas.getContext("2d");
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -766,6 +1417,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     const hex = `#${pixel[0].toString(16).padStart(2, "0")}${pixel[1].toString(16).padStart(2, "0")}${pixel[2].toString(16).padStart(2, "0")}`.toUpperCase();
     setFontColor(hex);
     if (selectedElement) updateSelectedTextProp("color", hex);
+    if (editingSpanIndex !== null) updateEditingSpanProp("color", hex);
   };
 
   const handleHexInputChange = (val) => {
@@ -773,6 +1425,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
       setFontColor(val.toUpperCase());
       if (selectedElement) updateSelectedTextProp("color", val.toUpperCase());
+      if (editingSpanIndex !== null) updateEditingSpanProp("color", val.toUpperCase());
     }
   };
 
@@ -780,35 +1433,68 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     setFontColor(c);
     setShowColorPicker(false);
     if (selectedElement) updateSelectedTextProp("color", c);
+    if (editingSpanIndex !== null) updateEditingSpanProp("color", c);
   };
 
   const toggleBold = () => {
     const newVal = !isBold;
     setIsBold(newVal);
     if (selectedElement) updateSelectedTextProp("bold", newVal);
+    if (editingSpanIndex !== null) updateEditingSpanProp("bold", newVal);
   };
 
   const toggleItalic = () => {
     const newVal = !isItalic;
     setIsItalic(newVal);
     if (selectedElement) updateSelectedTextProp("italic", newVal);
+    if (editingSpanIndex !== null) updateEditingSpanProp("italic", newVal);
   };
 
   const toggleUnderline = () => {
     const newVal = !isUnderline;
     setIsUnderline(newVal);
     if (selectedElement) updateSelectedTextProp("underline", newVal);
+    if (editingSpanIndex !== null) updateEditingSpanProp("underline", newVal);
   };
 
   const handleFontSizeChange = (val) => {
     const newSize = parseInt(val) || 16;
     setFontSize(newSize);
     if (selectedElement) updateSelectedTextProp("fontSize", newSize);
+    if (editingSpanIndex !== null) updateEditingSpanProp("fontSize", newSize);
   };
 
+  const handleFontFamilyChange = (family) => {
+    setSelectedFontFamily(family);
+    if (selectedElement) updateSelectedTextProp("fontFamily", family);
+    if (editingSpanIndex !== null) updateEditingSpanProp("fontFamily", family);
+  };
+
+  // ── Save PDF ──────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (isProcessing) return;
+
+    // Commit any active text layer edit
+    if (editingSpanIndex !== null) {
+      const textLayerEl = textLayerRef.current;
+      if (textLayerEl) {
+        const span = textLayerEl.querySelector(`span[data-idx="${editingSpanIndex}"]`);
+        if (span) {
+          const newText = span.textContent;
+          const el = (pageElements[currentPage] || [])[editingSpanIndex];
+          if (el && newText !== el.text) {
+            setPageElements((prev) => {
+              const elements = [...(prev[currentPage] || [])];
+              elements[editingSpanIndex] = { ...elements[editingSpanIndex], text: newText, modified: true };
+              return { ...prev, [currentPage]: elements };
+            });
+          }
+        }
+      }
+      setEditingSpanIndex(null);
+    }
     if (editingText) setEditingText(null);
+
     setIsProcessing(true);
     try {
       const { PDFDocument, rgb } = await import("pdf-lib");
@@ -817,13 +1503,34 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
       const pdfDoc = await PDFDocument.load(arrayBuffer);
       pdfDoc.registerFontkit(fontkit);
 
-      const [regularFontBytes, italicFontBytes] = await Promise.all([
-        fetch("/fonts/OpenSans-Regular.ttf").then((r) => r.arrayBuffer()),
-        fetch("/fonts/OpenSans-Italic.ttf").then((r) => r.arrayBuffer()),
-      ]);
+      // Dynamic font loading with cache
+      const fontCache = {};
+      const getFontForElement = async (el) => {
+        const family = el.fontFamily || "Open Sans";
+        const variant = el.bold && el.italic ? "boldItalic"
+          : el.bold ? "bold"
+          : el.italic ? "italic"
+          : "regular";
+        const cacheKey = `${family}-${variant}`;
+        if (fontCache[cacheKey]) return fontCache[cacheKey];
 
-      const regularFont = await pdfDoc.embedFont(regularFontBytes, { subset: true });
-      const italicFont = await pdfDoc.embedFont(italicFontBytes, { subset: true });
+        const config = FONT_FAMILIES[family] || FONT_FAMILIES["Liberation Sans"];
+        const url = config[variant] || config.regular;
+        try {
+          const bytes = await fetch(url).then((r) => r.arrayBuffer());
+          const font = await pdfDoc.embedFont(bytes, { subset: true });
+          fontCache[cacheKey] = font;
+          return font;
+        } catch (e) {
+          console.warn(`Font load failed for ${cacheKey}, falling back`, e);
+          if (!fontCache["Liberation Sans-regular"]) {
+            const bytes = await fetch("/fonts/LiberationSans-Regular.ttf").then((r) => r.arrayBuffer());
+            fontCache["Liberation Sans-regular"] = await pdfDoc.embedFont(bytes, { subset: true });
+          }
+          return fontCache["Liberation Sans-regular"];
+        }
+      };
+
       const pages = pdfDoc.getPages();
 
       for (const [pageIndexStr, elements] of Object.entries(pageElements)) {
@@ -838,16 +1545,48 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
         const scaleFactorY = pdfHeight / (renderPage.height / 1.5);
 
         for (const el of elements) {
-          if (el.type === "text") {
+          if (el.type === "pdfText") {
+            if (!el.modified) continue;
+
+            // Cover over original text position using sampled background color
+            const coverX = el.originalX * scaleFactorX;
+            const coverH = el.originalFontSize * scaleFactorY * 1.4;
+            const coverY = pdfHeight - el.originalY * scaleFactorY - coverH;
+            const coverW = (el.width + 4) * scaleFactorX;
+            const bgHex = (el.bgColor || "#ffffff").replace("#", "");
+            const bgR = parseInt(bgHex.substring(0, 2), 16) / 255;
+            const bgG = parseInt(bgHex.substring(2, 4), 16) / 255;
+            const bgB = parseInt(bgHex.substring(4, 6), 16) / 255;
+            page.drawRectangle({
+              x: coverX - 1,
+              y: coverY - 1,
+              width: coverW + 2,
+              height: coverH + 2,
+              color: rgb(bgR, bgG, bgB),
+            });
+
+            // Draw new text
+            if (el.text.trim()) {
+              const font = await getFontForElement(el);
+              const pdfFontSize = el.fontSize * scaleFactorX;
+              const pdfX = el.x * scaleFactorX;
+              const pdfY = pdfHeight - el.y * scaleFactorY - pdfFontSize;
+              const hex = (el.color || "#000000").replace("#", "");
+              const cr = parseInt(hex.substring(0, 2), 16) / 255;
+              const cg = parseInt(hex.substring(2, 4), 16) / 255;
+              const cb = parseInt(hex.substring(4, 6), 16) / 255;
+              page.drawText(el.text, { x: pdfX, y: pdfY, size: pdfFontSize, font, color: rgb(cr, cg, cb) });
+            }
+          } else if (el.type === "text") {
+            const font = await getFontForElement(el);
             const pdfFontSize = el.fontSize * scaleFactorX;
             const pdfX = el.x * scaleFactorX;
             const pdfY = pdfHeight - el.y * scaleFactorY - pdfFontSize;
             const hex = el.color.replace("#", "");
-            const r = parseInt(hex.substring(0, 2), 16) / 255;
-            const g = parseInt(hex.substring(2, 4), 16) / 255;
-            const b = parseInt(hex.substring(4, 6), 16) / 255;
-            const font = el.italic ? italicFont : regularFont;
-            page.drawText(el.text, { x: pdfX, y: pdfY, size: pdfFontSize, font, color: rgb(r, g, b) });
+            const cr = parseInt(hex.substring(0, 2), 16) / 255;
+            const cg = parseInt(hex.substring(2, 4), 16) / 255;
+            const cb = parseInt(hex.substring(4, 6), 16) / 255;
+            page.drawText(el.text, { x: pdfX, y: pdfY, size: pdfFontSize, font, color: rgb(cr, cg, cb) });
             if (el.underline) {
               const textWidth = font.widthOfTextAtSize(el.text, pdfFontSize);
               const lineY = pdfY - pdfFontSize * 0.1;
@@ -855,7 +1594,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 start: { x: pdfX, y: lineY },
                 end: { x: pdfX + textWidth, y: lineY },
                 thickness: Math.max(0.5, pdfFontSize * 0.05),
-                color: rgb(r, g, b),
+                color: rgb(cr, cg, cb),
               });
             }
           } else if (el.type === "eraser") {
@@ -914,7 +1653,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     }
   };
 
-  // Inline text edit helpers
+  // Inline text edit helpers (for user-added "text" elements only)
   const getTextEditStyle = () => {
     if (!editingText) return {};
     const el = (pageElements[editingText.pageIndex] || [])[editingText.elementIndex];
@@ -929,17 +1668,18 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     const top = (canvasRect.top - containerRect.top + container.scrollTop) + el.y * scale * 1.5 * cssScaleX;
     const fSize = el.fontSize * scale * 1.5 * cssScaleX;
     const width = (el.width || 200) * scale * 1.5 * cssScaleX;
+    const fontConfig = FONT_FAMILIES[el.fontFamily] || FONT_FAMILIES["Open Sans"];
     return {
       position: "absolute",
       left: `${left}px`,
       top: `${top}px`,
       fontSize: `${fSize}px`,
       lineHeight: "1.3",
-      fontFamily: '"Open Sans", sans-serif',
+      fontFamily: fontConfig.cssFamily,
       fontWeight: el.bold ? "bold" : "normal",
       fontStyle: el.italic ? "italic" : "normal",
       color: el.color,
-      width: `${width}px`,
+      width: `${Math.max(width, fSize * 3)}px`,
       minHeight: `${fSize * 1.5}px`,
     };
   };
@@ -956,28 +1696,29 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
   const finishEditing = () => {
     if (!editingText) return;
     const el = (pageElements[editingText.pageIndex] || [])[editingText.elementIndex];
-    // If text is empty after editing, remove the element
     if (el && !el.text.trim()) {
       handleDeleteElement(editingText.pageIndex, editingText.elementIndex);
     }
     setEditingText(null);
   };
 
-  const hasElements = Object.values(pageElements).some((els) => els.length > 0);
+  const hasModifiedContent = Object.values(pageElements).some((els) =>
+    els.some((el) => el.type !== "pdfText" || (el.type === "pdfText" && el.modified))
+  );
   const selectedTextEl = selectedElement
     ? (pageElements[selectedElement.pageIndex] || [])[selectedElement.elementIndex]
     : null;
-  const isTextSelected = selectedTextEl && selectedTextEl.type === "text";
+  const isTextSelected = selectedTextEl && (selectedTextEl.type === "text" || selectedTextEl.type === "pdfText");
 
   return (
     <div className={styles.editor_wrapper}>
       {/* Toolbar */}
-      <div className={styles.toolbar}>
+      <div className={styles.toolbar} onMouseDown={() => { toolbarClickRef.current = true; }}>
         <div className={styles.toolbar_group}>
           {/* Text tool */}
           <button
             className={`${styles.tool_btn} ${activeTool === "text" ? styles.active : ""}`}
-            onClick={() => { setActiveTool(activeTool === "text" ? null : "text"); setSelectedElement(null); }}
+            onClick={() => { setActiveTool(activeTool === "text" ? null : "text"); setSelectedElement(null); setEditingSpanIndex(null); }}
             title={t("edit-pdf:add_text")}
           >
             <Fonts size={18} />
@@ -997,7 +1738,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           {/* Eraser tool */}
           <button
             className={`${styles.tool_btn} ${activeTool === "eraser" ? styles.active : ""}`}
-            onClick={() => { setActiveTool(activeTool === "eraser" ? null : "eraser"); setSelectedElement(null); }}
+            onClick={() => { setActiveTool(activeTool === "eraser" ? null : "eraser"); setSelectedElement(null); setEditingSpanIndex(null); }}
             title={t("edit-pdf:add_eraser")}
           >
             <EraserFill size={18} />
@@ -1007,7 +1748,7 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           {/* Signature tool */}
           <button
             className={`${styles.tool_btn} ${activeTool === "signature" ? styles.active : ""}`}
-            onClick={() => { setActiveTool(activeTool === "signature" ? null : "signature"); setSelectedElement(null); }}
+            onClick={() => { setActiveTool(activeTool === "signature" ? null : "signature"); setSelectedElement(null); setEditingSpanIndex(null); }}
             title={t("edit-pdf:add_signature")}
           >
             <PenFill size={18} />
@@ -1018,9 +1759,9 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
         </div>
 
         {/* Text options */}
-        {(activeTool === "text" || isTextSelected) && (
+        {(activeTool === "text" || isTextSelected || editingSpanIndex !== null) && (
           <div className={styles.text_options}>
-            {activeTool === "text" && !isTextSelected && (
+            {activeTool === "text" && !isTextSelected && editingSpanIndex === null && (
               <input
                 type="text"
                 className={styles.text_input}
@@ -1038,6 +1779,17 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
               />
             )}
             <div className={styles.text_controls}>
+              <select
+                className={styles.font_select}
+                value={selectedFontFamily}
+                onChange={(e) => handleFontFamilyChange(e.target.value)}
+              >
+                <option value="Open Sans">Open Sans</option>
+                <option value="Liberation Sans">Arial / Helvetica</option>
+                <option value="Liberation Serif">Times New Roman</option>
+                <option value="Liberation Mono">Courier New</option>
+                <option value="Calibri">Calibri</option>
+              </select>
               <div className={styles.format_buttons}>
                 <button className={`${styles.format_btn} ${isBold ? styles.format_active : ""}`} onClick={toggleBold} title="Bold"><TypeBold size={18} /></button>
                 <button className={`${styles.format_btn} ${isItalic ? styles.format_active : ""}`} onClick={toggleItalic} title="Italic"><TypeItalic size={18} /></button>
@@ -1066,11 +1818,11 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 )}
               </div>
             </div>
-            {activeTool === "text" && !isTextSelected && (
+            {activeTool === "text" && !isTextSelected && editingSpanIndex === null && (
               <p className={styles.hint}>{t("edit-pdf:click_to_place")}</p>
             )}
-            {isTextSelected && !editingText && (
-              <p className={styles.hint}>{t("edit-pdf:edit_text_hint")}</p>
+            {editingSpanIndex !== null && (
+              <p className={styles.hint}>{t("edit-pdf:editing_text_hint")}</p>
             )}
           </div>
         )}
@@ -1155,23 +1907,33 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
         )}
       </div>
 
-      {/* Canvas area */}
+      {/* Canvas area with text layer overlay */}
       <div className={styles.canvas_container} ref={containerRef}>
-        <canvas
-          ref={canvasRef}
-          className={styles.canvas}
-          onMouseDown={handleCanvasMouseDown}
-          onMouseMove={handleCanvasMouseMove}
-          onMouseUp={handleCanvasMouseUp}
-          onMouseLeave={handleCanvasMouseUp}
-          onDoubleClick={handleCanvasDoubleClick}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          style={{
-            cursor: isDragging ? "grabbing" : isResizing ? "nwse-resize" : activeTool === "text" ? "text" : activeTool === "eraser" ? "crosshair" : activeTool === "signature" && signatureReady ? "copy" : "default",
-          }}
-        />
+        <div className={styles.page_wrapper} ref={pageWrapperRef}>
+          <canvas
+            ref={canvasRef}
+            className={styles.canvas}
+            onMouseDown={handleCanvasMouseDown}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseUp={handleCanvasMouseUp}
+            onMouseLeave={handleCanvasMouseUp}
+            onDoubleClick={handleCanvasDoubleClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{
+              cursor: isDragging ? "grabbing" : isResizing ? "nwse-resize" : activeTool === "text" ? "text" : activeTool === "eraser" ? "crosshair" : activeTool === "signature" && signatureReady ? "copy" : "default",
+            }}
+          />
+          <div
+            ref={textLayerRef}
+            className={styles.text_layer}
+            onClick={handleTextLayerClick}
+            onBlur={handleTextLayerBlur}
+            onKeyDown={handleTextLayerKeyDown}
+            onMouseDown={handleTextLayerMouseDown}
+          />
+        </div>
         {editingText && (() => {
           const el = (pageElements[editingText.pageIndex] || [])[editingText.elementIndex];
           if (!el || el.type !== "text") return null;
@@ -1208,9 +1970,9 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
           <button className={styles.nav_btn} onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))} disabled={currentPage >= totalPages - 1}><ChevronRight size={16} /></button>
         </div>
         <button
-          className={`${styles.save_btn} ${!hasElements || isProcessing ? styles.disabled : ""}`}
+          className={`${styles.save_btn} ${!hasModifiedContent || isProcessing ? styles.disabled : ""}`}
           onClick={handleSave}
-          disabled={!hasElements || isProcessing}
+          disabled={!hasModifiedContent || isProcessing}
         >
           <Download size={20} />
           {isProcessing ? t("edit-pdf:processing") : t("edit-pdf:save_changes")}

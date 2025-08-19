@@ -97,6 +97,23 @@
   color: #999;
 }
 
+.font_select {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+}
+
+.font_select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
 .text_controls {
   display: flex;
   align-items: center;
@@ -294,11 +311,34 @@
   box-sizing: border-box;
 }
 
-.canvas {
+/* Page wrapper: holds canvas + text layer overlay */
+.page_wrapper {
+  position: relative;
+  display: inline-block;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.canvas {
+  display: block;
   background: #fff;
   max-width: 100%;
   height: auto;
+}
+
+/* Text layer overlay — transparent spans positioned over the canvas */
+.text_layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Hover highlight on PDF text spans (not on the currently editing span) */
+.text_layer span:hover:not([contenteditable="true"]) {
+  background: rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
 }
 
 .page_nav {

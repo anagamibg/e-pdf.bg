@@ -149,7 +149,7 @@ certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --emai
 | `hooks/useToolsData.js` | Central tool registry — all tools defined here |
 | `components/ToolsList.js` | Navigation dropdown menu — manually lists tools by group |
 | `components/Nav.js` | Header navigation with sticky positioning; includes inline language dropdown |
-| `components/PDFEditor.js` | Canvas-based PDF editor (text + images) |
+| `components/PDFEditor.js` | PDF editor with HTML text layer overlay for inline editing of existing PDF text + canvas tools for images/erasers/signatures |
 | `components/SeoSchema.js` | Reusable JSON-LD structured data; accepts optional `aggregateRating` prop for AggregateRating schema |
 | `components/StarRating.js` | Star rating widget (1–5★); localStorage deduplication (1 vote/user/tool) |
 | `styles/StarRating.module.css` | Styles for StarRating component |
@@ -192,3 +192,21 @@ npm run lint   # ESLint
 - **Digital signature compatibility:** `-dOmitID=true` must NOT be used in Ghostscript compression commands — it removes the PDF Document ID which is required by external digital signing services (Adobe Sign, Evrotrust, eID, etc.). The compress-pdf.js command uses `-dOmitXMP=true` but preserves the Document ID intentionally.
 - **PDF to Excel:** Uses Python `pdfplumber` + `openpyxl` (not LibreOffice — LO cannot convert Draw→Calc). Script at `scripts/pdf-to-excel.py`. Requires `pip3 install pdfplumber openpyxl --break-system-packages` inside the Docker container after recreation.
 - **Excel to PDF row height fix:** LibreOffice headless doesn't auto-adjust row heights for wrapped text in Calc cells, causing text overlap in PDF output. A Python pre-processing step (`scripts/fix-excel-row-heights.py`) uses openpyxl to calculate and set proper row heights before LibreOffice conversion. Handles both `.xlsx` (native) and `.xls` (converts to xlsx first via LibreOffice).
+
+### PDF Editor Text Layer Architecture
+The PDF editor (`components/PDFEditor.js`) uses a **3-layer rendering approach** for editing existing PDF text:
+
+1. **Canvas layer** — pdf.js rasterizes the original PDF page as a PNG image, drawn on a `<canvas>`.
+2. **HTML text layer** — Transparent `<span>` elements positioned absolutely over the canvas, matching each text item's position from `page.getTextContent()`. Spans have `color: transparent` by default so the canvas rendering shows through.
+3. **Cover rect + visible span** — When user clicks a span to edit (single click, Sejda-style), or when text has been modified:
+   - A **cover rectangle** is drawn on the canvas at the original text position, using the **sampled background color** (not hardcoded white — works on colored backgrounds).
+   - The span's `color` is set to the extracted text color and `contentEditable` is enabled.
+   - This ensures only ONE rendering is visible at a time (never both canvas + span simultaneously).
+
+**Key implementation details:**
+- **Text color extraction:** Uses `page.getOperatorList()` to track `setFillRGBColor`, `setFillGray`, `setFillCMYKColor` operators with save/restore stack, mapping colors to `showText`/`showSpacedText` operations. Stored as `color`/`originalColor` on each `pdfText` element.
+- **Background sampling:** `sampleBackgroundColor()` reads canvas pixels around the text area edges (left, top, right) to determine the actual page background color. Stored as `bgColor` on the element.
+- **Toolbar blur prevention:** When user clicks toolbar controls (Bold, Italic, Font, Color, etc.) while editing a span, the span loses focus. A `toolbarClickRef` + `setTimeout(100ms)` pattern prevents the blur handler from committing and closing editing mode — instead, it refocuses the span.
+- **Coordinate system:** PDF space → Element space (`y = viewport1.height - t[5] - fontSize`) → Canvas pixels (`× scale × 1.5`) → CSS display (`× cssScaleRatio` via ResizeObserver).
+- **Saving:** `pdf-lib` draws a background-colored rectangle over the original text position + new text with the user's chosen font/size/color/bold/italic.
+- **Font mapping:** PDF font names are mapped to Liberation/Open Sans/Calibri TTF files via `PDF_FONT_MAP` and `FONT_FAMILIES` config. CSS `@font-face` loaded via `FontFace` API for HTML spans, TTF embedded via `pdf-lib` for saving.
