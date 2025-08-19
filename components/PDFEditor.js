@@ -57,6 +57,69 @@ const FONT_FAMILIES = {
     boldItalic: "/fonts/calibriz.ttf",
     cssFamily: 'Calibri, "Liberation Sans", Arial, sans-serif',
   },
+  "Roboto": {
+    regular: "/fonts/Roboto-Regular.ttf",
+    bold: "/fonts/Roboto-Bold.ttf",
+    italic: "/fonts/Roboto-Italic.ttf",
+    boldItalic: "/fonts/Roboto-Bold.ttf",
+    cssFamily: 'Roboto, "Liberation Sans", Arial, sans-serif',
+  },
+  "Lato": {
+    regular: "/fonts/Lato-Regular.ttf",
+    bold: "/fonts/Lato-Bold.ttf",
+    italic: "/fonts/Lato-Italic.ttf",
+    boldItalic: "/fonts/Lato-BoldItalic.ttf",
+    cssFamily: 'Lato, "Liberation Sans", sans-serif',
+  },
+  "Montserrat": {
+    regular: "/fonts/Montserrat-Regular.ttf",
+    bold: "/fonts/Montserrat-Bold.ttf",
+    italic: "/fonts/Montserrat-Italic.ttf",
+    boldItalic: "/fonts/Montserrat-BoldItalic.ttf",
+    cssFamily: 'Montserrat, "Liberation Sans", sans-serif',
+  },
+  "Noto Sans": {
+    regular: "/fonts/NotoSans-Regular.ttf",
+    bold: "/fonts/NotoSans-Bold.ttf",
+    italic: "/fonts/NotoSans-Italic.ttf",
+    boldItalic: "/fonts/NotoSans-BoldItalic.ttf",
+    cssFamily: '"Noto Sans", "Liberation Sans", sans-serif',
+  },
+  "Playfair Display": {
+    regular: "/fonts/PlayfairDisplay-Regular.ttf",
+    bold: "/fonts/PlayfairDisplay-Bold.ttf",
+    italic: "/fonts/PlayfairDisplay-Italic.ttf",
+    boldItalic: "/fonts/PlayfairDisplay-BoldItalic.ttf",
+    cssFamily: '"Playfair Display", "Liberation Serif", Georgia, serif',
+  },
+  "PT Sans": {
+    regular: "/fonts/PTSans-Regular.ttf",
+    bold: "/fonts/PTSans-Bold.ttf",
+    italic: "/fonts/PTSans-Italic.ttf",
+    boldItalic: "/fonts/PTSans-BoldItalic.ttf",
+    cssFamily: '"PT Sans", "Liberation Sans", sans-serif',
+  },
+  "Raleway": {
+    regular: "/fonts/Raleway-Regular.ttf",
+    bold: "/fonts/Raleway-Bold.ttf",
+    italic: "/fonts/Raleway-Italic.ttf",
+    boldItalic: "/fonts/Raleway-BoldItalic.ttf",
+    cssFamily: 'Raleway, "Liberation Sans", sans-serif',
+  },
+  "Oswald": {
+    regular: "/fonts/Oswald-Regular.ttf",
+    bold: "/fonts/Oswald-Bold.ttf",
+    italic: "/fonts/Oswald-Regular.ttf",
+    boldItalic: "/fonts/Oswald-Bold.ttf",
+    cssFamily: 'Oswald, "Liberation Sans", sans-serif',
+  },
+  "Ubuntu": {
+    regular: "/fonts/Ubuntu-Regular.ttf",
+    bold: "/fonts/Ubuntu-Bold.ttf",
+    italic: "/fonts/Ubuntu-Italic.ttf",
+    boldItalic: "/fonts/Ubuntu-BoldItalic.ttf",
+    cssFamily: 'Ubuntu, "Liberation Sans", sans-serif',
+  },
 };
 
 const PDF_FONT_MAP = {
@@ -71,6 +134,16 @@ const PDF_FONT_MAP = {
   "courier new": "Liberation Mono",
   "calibri": "Calibri",
   "open sans": "Open Sans",
+  "roboto": "Roboto",
+  "lato": "Lato",
+  "montserrat": "Montserrat",
+  "noto sans": "Noto Sans",
+  "playfair display": "Playfair Display",
+  "playfair": "Playfair Display",
+  "pt sans": "PT Sans",
+  "raleway": "Raleway",
+  "oswald": "Oswald",
+  "ubuntu": "Ubuntu",
 };
 
 const resolveFontFamily = (pdfFontFamily) => {
@@ -86,22 +159,23 @@ const resolveFontFamily = (pdfFontFamily) => {
 let canvasFontsLoaded = false;
 const loadCanvasFonts = async () => {
   if (canvasFontsLoaded) return;
-  const fontsToLoad = [
-    { name: "Liberation Sans", url: "/fonts/LiberationSans-Regular.ttf", weight: "normal", style: "normal" },
-    { name: "Liberation Sans", url: "/fonts/LiberationSans-Bold.ttf", weight: "bold", style: "normal" },
-    { name: "Liberation Sans", url: "/fonts/LiberationSans-Italic.ttf", weight: "normal", style: "italic" },
-    { name: "Liberation Sans", url: "/fonts/LiberationSans-BoldItalic.ttf", weight: "bold", style: "italic" },
-    { name: "Liberation Serif", url: "/fonts/LiberationSerif-Regular.ttf", weight: "normal", style: "normal" },
-    { name: "Liberation Serif", url: "/fonts/LiberationSerif-Bold.ttf", weight: "bold", style: "normal" },
-    { name: "Liberation Serif", url: "/fonts/LiberationSerif-Italic.ttf", weight: "normal", style: "italic" },
-    { name: "Liberation Serif", url: "/fonts/LiberationSerif-BoldItalic.ttf", weight: "bold", style: "italic" },
-    { name: "Liberation Mono", url: "/fonts/LiberationMono-Regular.ttf", weight: "normal", style: "normal" },
-    { name: "Liberation Mono", url: "/fonts/LiberationMono-Bold.ttf", weight: "bold", style: "normal" },
-    { name: "Liberation Mono", url: "/fonts/LiberationMono-Italic.ttf", weight: "normal", style: "italic" },
-    { name: "Calibri", url: "/fonts/calibri.ttf", weight: "normal", style: "normal" },
-    { name: "Calibri", url: "/fonts/calibrib.ttf", weight: "bold", style: "normal" },
-    { name: "Calibri", url: "/fonts/calibrii.ttf", weight: "normal", style: "italic" },
-  ];
+  // Dynamically build font loading list from FONT_FAMILIES config
+  const fontsToLoad = [];
+  const seenUrls = new Set();
+  for (const [name, config] of Object.entries(FONT_FAMILIES)) {
+    const variants = [
+      { url: config.regular, weight: "normal", style: "normal" },
+      { url: config.bold, weight: "bold", style: "normal" },
+      { url: config.italic, weight: "normal", style: "italic" },
+      { url: config.boldItalic, weight: "bold", style: "italic" },
+    ];
+    for (const v of variants) {
+      if (v.url && !seenUrls.has(v.url)) {
+        seenUrls.add(v.url);
+        fontsToLoad.push({ name, url: v.url, weight: v.weight, style: v.style });
+      }
+    }
+  }
   const promises = fontsToLoad.map(async (f) => {
     try {
       const face = new FontFace(f.name, `url(${f.url})`, { weight: f.weight, style: f.style });
@@ -1018,6 +1092,14 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
 
   const blurTimeoutRef = useRef(null);
 
+  // Refocus the editing span after toolbar interaction completes
+  const refocusEditingSpan = useCallback(() => {
+    const textLayerEl = textLayerRef.current;
+    if (!textLayerEl || editingSpanIndex === null) return;
+    const editSpan = textLayerEl.querySelector(`span[data-idx="${editingSpanIndex}"]`);
+    if (editSpan && editSpan.isConnected) editSpan.focus();
+  }, [editingSpanIndex]);
+
   const handleTextLayerBlur = useCallback((e) => {
     if (editingSpanIndex === null) return;
     const span = e.target.closest("span[data-idx]");
@@ -1026,13 +1108,24 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     if (idx !== editingSpanIndex) return;
 
     // Delay the commit — if the user clicked on toolbar controls (bold, font, color, etc.)
-    // the toolbarClickRef will be true and we refocus the span instead of committing.
+    // the toolbarClickRef will be true and we keep editing mode alive.
     if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
 
     blurTimeoutRef.current = setTimeout(() => {
-      // If mousedown happened in toolbar area, refocus span and stay in editing mode
+      // If mousedown happened in toolbar area, keep editing mode alive
       if (toolbarClickRef.current) {
         toolbarClickRef.current = false;
+        // Check what element has focus — if it's an interactive element (select, input)
+        // let it keep focus and don't refocus the span (would close the dropdown).
+        // The span will be refocused when the toolbar interaction finishes.
+        const active = document.activeElement;
+        const tag = active ? active.tagName : "";
+        if (tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA") {
+          // Don't refocus — let the interactive element do its thing.
+          // Span will be refocused via onChange handlers or when the element blurs.
+          return;
+        }
+        // For buttons and other non-interactive clicks, refocus the span immediately
         if (span.isConnected) span.focus();
         return;
       }
@@ -1417,7 +1510,10 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     const hex = `#${pixel[0].toString(16).padStart(2, "0")}${pixel[1].toString(16).padStart(2, "0")}${pixel[2].toString(16).padStart(2, "0")}`.toUpperCase();
     setFontColor(hex);
     if (selectedElement) updateSelectedTextProp("color", hex);
-    if (editingSpanIndex !== null) updateEditingSpanProp("color", hex);
+    if (editingSpanIndex !== null) {
+      updateEditingSpanProp("color", hex);
+      setTimeout(refocusEditingSpan, 50);
+    }
   };
 
   const handleHexInputChange = (val) => {
@@ -1433,7 +1529,10 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     setFontColor(c);
     setShowColorPicker(false);
     if (selectedElement) updateSelectedTextProp("color", c);
-    if (editingSpanIndex !== null) updateEditingSpanProp("color", c);
+    if (editingSpanIndex !== null) {
+      updateEditingSpanProp("color", c);
+      setTimeout(refocusEditingSpan, 50);
+    }
   };
 
   const toggleBold = () => {
@@ -1461,13 +1560,19 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     const newSize = parseInt(val) || 16;
     setFontSize(newSize);
     if (selectedElement) updateSelectedTextProp("fontSize", newSize);
-    if (editingSpanIndex !== null) updateEditingSpanProp("fontSize", newSize);
+    if (editingSpanIndex !== null) {
+      updateEditingSpanProp("fontSize", newSize);
+      setTimeout(refocusEditingSpan, 50);
+    }
   };
 
   const handleFontFamilyChange = (family) => {
     setSelectedFontFamily(family);
     if (selectedElement) updateSelectedTextProp("fontFamily", family);
-    if (editingSpanIndex !== null) updateEditingSpanProp("fontFamily", family);
+    if (editingSpanIndex !== null) {
+      updateEditingSpanProp("fontFamily", family);
+      setTimeout(refocusEditingSpan, 50);
+    }
   };
 
   // ── Save PDF ──────────────────────────────────────────────────────────
@@ -1785,6 +1890,15 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 onChange={(e) => handleFontFamilyChange(e.target.value)}
               >
                 <option value="Open Sans">Open Sans</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Lato">Lato</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Noto Sans">Noto Sans</option>
+                <option value="Raleway">Raleway</option>
+                <option value="PT Sans">PT Sans</option>
+                <option value="Ubuntu">Ubuntu</option>
+                <option value="Oswald">Oswald</option>
+                <option value="Playfair Display">Playfair Display</option>
                 <option value="Liberation Sans">Arial / Helvetica</option>
                 <option value="Liberation Serif">Times New Roman</option>
                 <option value="Liberation Mono">Courier New</option>
