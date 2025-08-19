@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-02-20
+
+### Added
+- **PDF Editor — inline text editing:** Rewritten text editing system with HTML text layer overlay for Sejda-style single-click editing of existing PDF text
+  - Text color extraction from PDF operator list (RGB, Gray, CMYK color spaces)
+  - Background color sampling from canvas pixels for cover rectangles (works on colored backgrounds)
+  - Toolbar blur prevention — formatting controls (bold, italic, font, color, size) stay open during editing
+  - 30 fonts available in dropdown organized by category (Sans-serif, Serif, Monospace, Display/Decorative, System)
+  - **Google Fonts added:** Roboto, Poppins, Inter, Lato, Montserrat, Nunito, Noto Sans, Source Sans 3, Fira Sans, Raleway, PT Sans, Barlow, Cabin, Archivo, Ubuntu, Quicksand, Oswald, Comfortaa, Playfair Display, Merriweather, Bitter, Bebas Neue, Dancing Script, Pacifico
+  - **System font alternatives:** Tinos (Georgia metric-compatible), Liberation Sans/Serif/Mono, Calibri
+  - Dynamic font loading from FONT_FAMILIES config via FontFace API
+  - PDF font name recognition via PDF_FONT_MAP (maps PDF-embedded font names to available fonts)
+
+### Fixed
+- **PDF Editor — font dropdown:** Fixed font select dropdown closing immediately when clicked during text editing (blur handler now checks active element type before refocusing span)
+- **PDF Editor — toolbar interaction:** All formatting controls (bold, italic, underline, font family, font size, color picker) now properly work during inline text editing without losing editing mode
+
 ## [1.3.1] - 2026-02-19
 
 ### Fixed

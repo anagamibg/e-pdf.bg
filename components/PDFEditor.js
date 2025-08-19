@@ -120,6 +120,121 @@ const FONT_FAMILIES = {
     boldItalic: "/fonts/Ubuntu-BoldItalic.ttf",
     cssFamily: 'Ubuntu, "Liberation Sans", sans-serif',
   },
+  // ── New Google Fonts ──
+  "Poppins": {
+    regular: "/fonts/Poppins-Regular.ttf",
+    bold: "/fonts/Poppins-Bold.ttf",
+    italic: "/fonts/Poppins-Italic.ttf",
+    boldItalic: "/fonts/Poppins-BoldItalic.ttf",
+    cssFamily: 'Poppins, "Liberation Sans", sans-serif',
+  },
+  "Inter": {
+    regular: "/fonts/Inter-Regular.ttf",
+    bold: "/fonts/Inter-Bold.ttf",
+    italic: "/fonts/Inter-Italic.ttf",
+    boldItalic: "/fonts/Inter-BoldItalic.ttf",
+    cssFamily: 'Inter, "Liberation Sans", sans-serif',
+  },
+  "Nunito": {
+    regular: "/fonts/Nunito-Regular.ttf",
+    bold: "/fonts/Nunito-Bold.ttf",
+    italic: "/fonts/Nunito-Italic.ttf",
+    boldItalic: "/fonts/Nunito-BoldItalic.ttf",
+    cssFamily: 'Nunito, "Liberation Sans", sans-serif',
+  },
+  "Source Sans 3": {
+    regular: "/fonts/SourceSans3-Regular.ttf",
+    bold: "/fonts/SourceSans3-Bold.ttf",
+    italic: "/fonts/SourceSans3-Italic.ttf",
+    boldItalic: "/fonts/SourceSans3-BoldItalic.ttf",
+    cssFamily: '"Source Sans 3", "Liberation Sans", sans-serif',
+  },
+  "Merriweather": {
+    regular: "/fonts/Merriweather-Regular.ttf",
+    bold: "/fonts/Merriweather-Bold.ttf",
+    italic: "/fonts/Merriweather-Italic.ttf",
+    boldItalic: "/fonts/Merriweather-BoldItalic.ttf",
+    cssFamily: 'Merriweather, "Liberation Serif", Georgia, serif',
+  },
+  "Fira Sans": {
+    regular: "/fonts/FiraSans-Regular.ttf",
+    bold: "/fonts/FiraSans-Bold.ttf",
+    italic: "/fonts/FiraSans-Italic.ttf",
+    boldItalic: "/fonts/FiraSans-BoldItalic.ttf",
+    cssFamily: '"Fira Sans", "Liberation Sans", sans-serif',
+  },
+  "Quicksand": {
+    regular: "/fonts/Quicksand-Regular.ttf",
+    bold: "/fonts/Quicksand-Bold.ttf",
+    italic: "/fonts/Quicksand-Regular.ttf",
+    boldItalic: "/fonts/Quicksand-Bold.ttf",
+    cssFamily: 'Quicksand, "Liberation Sans", sans-serif',
+  },
+  "Bitter": {
+    regular: "/fonts/Bitter-Regular.ttf",
+    bold: "/fonts/Bitter-Bold.ttf",
+    italic: "/fonts/Bitter-Italic.ttf",
+    boldItalic: "/fonts/Bitter-BoldItalic.ttf",
+    cssFamily: 'Bitter, "Liberation Serif", Georgia, serif',
+  },
+  "Cabin": {
+    regular: "/fonts/Cabin-Regular.ttf",
+    bold: "/fonts/Cabin-Bold.ttf",
+    italic: "/fonts/Cabin-Italic.ttf",
+    boldItalic: "/fonts/Cabin-BoldItalic.ttf",
+    cssFamily: 'Cabin, "Liberation Sans", sans-serif',
+  },
+  "Archivo": {
+    regular: "/fonts/Archivo-Regular.ttf",
+    bold: "/fonts/Archivo-Bold.ttf",
+    italic: "/fonts/Archivo-Italic.ttf",
+    boldItalic: "/fonts/Archivo-BoldItalic.ttf",
+    cssFamily: 'Archivo, "Liberation Sans", sans-serif',
+  },
+  "Barlow": {
+    regular: "/fonts/Barlow-Regular.ttf",
+    bold: "/fonts/Barlow-Bold.ttf",
+    italic: "/fonts/Barlow-Italic.ttf",
+    boldItalic: "/fonts/Barlow-BoldItalic.ttf",
+    cssFamily: 'Barlow, "Liberation Sans", sans-serif',
+  },
+  // ── Decorative / Display fonts ──
+  "Dancing Script": {
+    regular: "/fonts/DancingScript-Regular.ttf",
+    bold: "/fonts/DancingScript-Bold.ttf",
+    italic: "/fonts/DancingScript-Regular.ttf",
+    boldItalic: "/fonts/DancingScript-Bold.ttf",
+    cssFamily: '"Dancing Script", cursive',
+  },
+  "Comfortaa": {
+    regular: "/fonts/Comfortaa-Regular.ttf",
+    bold: "/fonts/Comfortaa-Bold.ttf",
+    italic: "/fonts/Comfortaa-Regular.ttf",
+    boldItalic: "/fonts/Comfortaa-Bold.ttf",
+    cssFamily: 'Comfortaa, "Liberation Sans", sans-serif',
+  },
+  "Pacifico": {
+    regular: "/fonts/Pacifico-Regular.ttf",
+    bold: "/fonts/Pacifico-Regular.ttf",
+    italic: "/fonts/Pacifico-Regular.ttf",
+    boldItalic: "/fonts/Pacifico-Regular.ttf",
+    cssFamily: 'Pacifico, cursive',
+  },
+  "Bebas Neue": {
+    regular: "/fonts/BebasNeue-Regular.ttf",
+    bold: "/fonts/BebasNeue-Regular.ttf",
+    italic: "/fonts/BebasNeue-Regular.ttf",
+    boldItalic: "/fonts/BebasNeue-Regular.ttf",
+    cssFamily: '"Bebas Neue", "Liberation Sans", sans-serif',
+  },
+  // ── System font alternatives ──
+  "Tinos": {
+    regular: "/fonts/Tinos-Regular.ttf",
+    bold: "/fonts/Tinos-Bold.ttf",
+    italic: "/fonts/Tinos-Italic.ttf",
+    boldItalic: "/fonts/Tinos-BoldItalic.ttf",
+    cssFamily: 'Tinos, Georgia, "Liberation Serif", serif',
+  },
 };
 
 const PDF_FONT_MAP = {
@@ -144,6 +259,33 @@ const PDF_FONT_MAP = {
   "raleway": "Raleway",
   "oswald": "Oswald",
   "ubuntu": "Ubuntu",
+  "poppins": "Poppins",
+  "inter": "Inter",
+  "nunito": "Nunito",
+  "source sans": "Source Sans 3",
+  "source sans 3": "Source Sans 3",
+  "source sans pro": "Source Sans 3",
+  "merriweather": "Merriweather",
+  "fira sans": "Fira Sans",
+  "quicksand": "Quicksand",
+  "bitter": "Bitter",
+  "cabin": "Cabin",
+  "archivo": "Archivo",
+  "barlow": "Barlow",
+  "dancing script": "Dancing Script",
+  "comfortaa": "Comfortaa",
+  "pacifico": "Pacifico",
+  "bebas neue": "Bebas Neue",
+  "bebas": "Bebas Neue",
+  "tinos": "Tinos",
+  "georgia": "Tinos",
+  "verdana": "Liberation Sans",
+  "tahoma": "Liberation Sans",
+  "trebuchet": "Liberation Sans",
+  "trebuchet ms": "Liberation Sans",
+  "impact": "Bebas Neue",
+  "comic sans": "Comfortaa",
+  "comic sans ms": "Comfortaa",
 };
 
 const resolveFontFamily = (pdfFontFamily) => {
@@ -1889,20 +2031,46 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
                 value={selectedFontFamily}
                 onChange={(e) => handleFontFamilyChange(e.target.value)}
               >
-                <option value="Open Sans">Open Sans</option>
-                <option value="Roboto">Roboto</option>
-                <option value="Lato">Lato</option>
-                <option value="Montserrat">Montserrat</option>
-                <option value="Noto Sans">Noto Sans</option>
-                <option value="Raleway">Raleway</option>
-                <option value="PT Sans">PT Sans</option>
-                <option value="Ubuntu">Ubuntu</option>
-                <option value="Oswald">Oswald</option>
-                <option value="Playfair Display">Playfair Display</option>
-                <option value="Liberation Sans">Arial / Helvetica</option>
-                <option value="Liberation Serif">Times New Roman</option>
-                <option value="Liberation Mono">Courier New</option>
-                <option value="Calibri">Calibri</option>
+                <optgroup label="Sans-serif">
+                  <option value="Open Sans">Open Sans</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Lato">Lato</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="Nunito">Nunito</option>
+                  <option value="Noto Sans">Noto Sans</option>
+                  <option value="Source Sans 3">Source Sans</option>
+                  <option value="Fira Sans">Fira Sans</option>
+                  <option value="Raleway">Raleway</option>
+                  <option value="PT Sans">PT Sans</option>
+                  <option value="Barlow">Barlow</option>
+                  <option value="Cabin">Cabin</option>
+                  <option value="Archivo">Archivo</option>
+                  <option value="Ubuntu">Ubuntu</option>
+                  <option value="Quicksand">Quicksand</option>
+                  <option value="Oswald">Oswald</option>
+                  <option value="Comfortaa">Comfortaa</option>
+                </optgroup>
+                <optgroup label="Serif">
+                  <option value="Playfair Display">Playfair Display</option>
+                  <option value="Merriweather">Merriweather</option>
+                  <option value="Bitter">Bitter</option>
+                  <option value="Tinos">Georgia / Tinos</option>
+                  <option value="Liberation Serif">Times New Roman</option>
+                </optgroup>
+                <optgroup label="Monospace">
+                  <option value="Liberation Mono">Courier New</option>
+                </optgroup>
+                <optgroup label="Display / Decorative">
+                  <option value="Bebas Neue">Bebas Neue</option>
+                  <option value="Dancing Script">Dancing Script</option>
+                  <option value="Pacifico">Pacifico</option>
+                </optgroup>
+                <optgroup label="System">
+                  <option value="Liberation Sans">Arial / Helvetica</option>
+                  <option value="Calibri">Calibri</option>
+                </optgroup>
               </select>
               <div className={styles.format_buttons}>
                 <button className={`${styles.format_btn} ${isBold ? styles.format_active : ""}`} onClick={toggleBold} title="Bold"><TypeBold size={18} /></button>

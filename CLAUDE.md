@@ -3,7 +3,7 @@
 ## Project Overview
 **e-pdf.bg** is a free online PDF tools web application built with Next.js. It allows users to merge, compress, convert, edit, protect, and unlock PDF files. The site supports Bulgarian (bg, default) and English (en) localization.
 
-**Version:** 1.3.1
+**Version:** 1.4.0
 **Live URL:** https://e-pdf.bg
 
 ## Tech Stack
@@ -209,4 +209,4 @@ The PDF editor (`components/PDFEditor.js`) uses a **3-layer rendering approach**
 - **Toolbar blur prevention:** When user clicks toolbar controls (Bold, Italic, Font, Color, etc.) while editing a span, the span loses focus. A `toolbarClickRef` + `setTimeout(100ms)` pattern prevents the blur handler from committing and closing editing mode — instead, it refocuses the span.
 - **Coordinate system:** PDF space → Element space (`y = viewport1.height - t[5] - fontSize`) → Canvas pixels (`× scale × 1.5`) → CSS display (`× cssScaleRatio` via ResizeObserver).
 - **Saving:** `pdf-lib` draws a background-colored rectangle over the original text position + new text with the user's chosen font/size/color/bold/italic.
-- **Font mapping:** PDF font names are mapped to Liberation/Open Sans/Calibri TTF files via `PDF_FONT_MAP` and `FONT_FAMILIES` config. CSS `@font-face` loaded via `FontFace` API for HTML spans, TTF embedded via `pdf-lib` for saving.
+- **Font mapping:** PDF font names are mapped to 30 font families via `PDF_FONT_MAP` and `FONT_FAMILIES` config. CSS `@font-face` loaded via `FontFace` API for HTML spans, TTF embedded via `pdf-lib` for saving. Fonts are organized in the dropdown by category: Sans-serif (Open Sans, Roboto, Poppins, Inter, Lato, Montserrat, Nunito, Noto Sans, Source Sans 3, Fira Sans, Raleway, PT Sans, Barlow, Cabin, Archivo, Ubuntu, Quicksand, Oswald, Comfortaa), Serif (Playfair Display, Merriweather, Bitter, Tinos/Georgia, Times New Roman), Monospace (Courier New), Display (Bebas Neue, Dancing Script, Pacifico), System (Arial/Helvetica, Calibri). All TTFs served from `/public/fonts/`.
