@@ -116,6 +116,20 @@ const useToolsData = () => {
       URI: "/grayscale-pdf",
     },
 
+    LightenPDFTool: {
+      key: "LightenPDF",
+      title: t("common:tool_name_lighten_pdf"),
+      description: t("common:tool_desc_lighten_pdf"),
+      href: "/lighten-pdf",
+      icon: <FileEarmarkPdf />,
+      acceptedInputMimeType: "application/pdf",
+      acceptedInputFileMaxSize: 26214400, //25MB
+      newFileNameSuffix: "_lightened.pdf",
+      outputFileMimeType: "application/pdf",
+      thumbnailImageURL: "",
+      URI: "/lighten-pdf",
+    },
+
     ExtractPagesTool: {
       key: "ExtractPages",
       title: t("common:tool_name_extract_pages"),

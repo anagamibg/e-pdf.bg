@@ -66,6 +66,12 @@ const ToolsList = React.memo(function ToolsList() {
         />
 
         <NavItem
+          title={toolsData["LightenPDFTool"].title}
+          url={toolsData["LightenPDFTool"].href}
+          icon={toolsData["LightenPDFTool"].icon}
+        />
+
+        <NavItem
           title={toolsData["ExtractPagesTool"].title}
           url={toolsData["ExtractPagesTool"].href}
           icon={toolsData["ExtractPagesTool"].icon}

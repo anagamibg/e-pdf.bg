@@ -80,6 +80,8 @@
   "tool_desc_organize_pdf": "Sort, delete and merge pages of your PDF file",
   "tool_desc_compress_pdf": "Reduce the size of your PDF without losing quality",
   "tool_desc_grayscale_pdf": "Convert Text and Images to grayscale in your PDF file",
+  "tool_name_lighten_pdf": "Lighten PDF",
+  "tool_desc_lighten_pdf": "Lighten PDF files for a cleaner, more readable look — ideal for scanned documents",
   "tool_desc_repair_pdf": "Repair a damaged PDF and recover data",
   "tool_desc_extract_pages": "Get a PDF document containing only the desired pages",
   "tool_desc_split_pdf": "Split a PDF file into individual pages or by page ranges",
