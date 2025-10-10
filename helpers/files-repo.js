@@ -558,14 +558,60 @@ async function convertImagesToPNGAndCreatePDF(
   });
 }
 
+const saveDataToJsonForSplit = async (id, filepath) => {
+  const splitPagesPath = tempDir + "/pdftools_data/" + id + "/split_pages";
+  const outputFilePath = tempDir + "/pdftools_data/" + id + "/split_pages.zip";
+  const pdfToolsFilesPath = tempDir + "/pdftools_data/" + id + "/";
+  const dataJSONPath = pdfToolsFilesPath + id + ".json";
+  let file = {};
+  file.splitPagesPath = splitPagesPath;
+  file.outputFilePath = outputFilePath;
+  file.inputFilePath = filepath;
+  file.dataJSONPath = dataJSONPath;
+  file.pdfToolsFilesPath = pdfToolsFilesPath;
+  file.status = "uploaded";
+
+  try {
+    await writeFile(dataJSONPath, JSON.stringify(file));
+    await createDirectory(splitPagesPath);
+    scheduleFileDeletion(pdfToolsFilesPath, filepath);
+    return file;
+  } catch (error) {
+    console.log("upload error", error);
+    return null;
+  }
+};
+
+const runSplitPDFCommand = async (
+  command,
+  dataJSONPath,
+  splitPagesPath,
+  outputFilePath
+) => {
+  try {
+    await execProm(command);
+    const exist = await isExists(dataJSONPath);
+    if (exist) {
+      await zipFile(splitPagesPath, dataJSONPath, outputFilePath);
+    }
+  } catch (ex) {
+    console.log("runSplitPDFCommand err", ex);
+    update(dataJSONPath, {
+      status: "failed",
+    });
+  }
+};
+
 export const filesRepo = {
   saveDataToJson,
   saveDataToJsonForImages,
+  saveDataToJsonForSplit,
   update,
   isExists,
   runCommand,
   zipFile,
   runConvertPDFToImageCommand,
+  runSplitPDFCommand,
   createPDFFromImages,
   convertImagesToPNGAndCreatePDF,
 };

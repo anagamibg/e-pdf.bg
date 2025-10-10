@@ -26,5 +26,6 @@
   "PDFToPPTX":      { "totalRatings": 3, "totalScore": 15, "voters": ["seed1", "seed2", "seed3"] },
   "PDFToTXT":       { "totalRatings": 3, "totalScore": 15, "voters": ["seed1", "seed2", "seed3"] },
   "PDFToExcel":     { "totalRatings": 3, "totalScore": 15, "voters": ["seed1", "seed2", "seed3"] },
-  "PDFToZIP":       { "totalRatings": 3, "totalScore": 15, "voters": ["seed1", "seed2", "seed3"] }
+  "PDFToZIP":       { "totalRatings": 3, "totalScore": 15, "voters": ["seed1", "seed2", "seed3"] },
+  "SplitPDF":       { "totalRatings": 3, "totalScore": 15, "voters": ["seed1", "seed2", "seed3"] }
 }

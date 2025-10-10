@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-02-20
+
+### Added
+- **Split PDF tool:** New server-side tool to split a PDF file into multiple separate PDF files, downloaded as a ZIP archive
+  - **Split all pages** — each page is extracted as an individual PDF file using Ghostscript (`gs -dFirstPage=N -dLastPage=N`)
+  - **Split by ranges** — user defines custom page ranges (e.g. 1-3, 4-6, 7-10), each range becomes a separate PDF
+  - Page count detection via `qpdf --show-npages`
+  - Page previews shown client-side before splitting (reuses `handleExtractPagesFileSelection`)
+  - New server helpers: `saveDataToJsonForSplit()`, `runSplitPDFCommand()` in `files-repo.js`
+  - Full BG/EN localization, star ratings, SEO schema
+  - Added to navigation under "Merge & Edit" group
+
 ## [1.4.0] - 2026-02-20
 
 ### Added

@@ -3,7 +3,7 @@
 ## Project Overview
 **e-pdf.bg** is a free online PDF tools web application built with Next.js. It allows users to merge, compress, convert, edit, protect, and unlock PDF files. The site supports Bulgarian (bg, default) and English (en) localization.
 
-**Version:** 1.4.0
+**Version:** 1.5.0
 **Live URL:** https://e-pdf.bg
 
 ## Tech Stack
@@ -12,7 +12,7 @@
 - **i18n:** next-i18next (bg default, en)
 - **PDF Processing:**
   - Client-side: `pdf-lib` v1.17.1 (text/image embedding), `react-pdf` v8.0.2 (rendering)
-  - Server-side: Ghostscript (compression, grayscale), qpdf (protect/unlock), LibreOffice (office conversions), Python pdfplumber+openpyxl (PDF→Excel), Python openpyxl row-height fix (Excel→PDF pre-processing)
+  - Server-side: Ghostscript (compression, grayscale, split PDF), qpdf (protect/unlock, page counting), LibreOffice (office conversions), Python pdfplumber+openpyxl (PDF→Excel), Python openpyxl row-height fix (Excel→PDF pre-processing)
   - `pdfjs-dist` loaded from CDN (3.11.174) for PDF Editor canvas rendering
 - **File Handling:** formidable (uploads), jszip (zip), pdfkit (image→PDF)
 - **UI:** react-bootstrap-icons, react-toastify, react-dnd, react-selecto
@@ -186,7 +186,8 @@ npm run lint   # ESLint
 - **PDF Editor CDN:** pdf.js loaded from cdnjs.cloudflare.com (v3.11.174), not npm
 - **No fabric.js needed:** The editor uses native HTML5 Canvas API instead
 - **Language switcher:** Inline dropdown in nav (no modal). `LangModal.js` and `LangModal.module.css` removed. Styles live in `MegaMenu.module.css` under `.lang_dropdown*` classes.
-- **Star ratings:** All 28 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
+- **Split PDF tool:** Server-side tool using Ghostscript + qpdf. Supports two modes: "Split all pages" (each page as separate PDF) and "Split by ranges" (user-defined ranges like 1-3, 4-6). Uses `saveDataToJsonForSplit()` and `runSplitPDFCommand()` in `files-repo.js`. Output is a ZIP file. Page previews shown client-side via `handleExtractPagesFileSelection()`.
+- **Star ratings:** All 29 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
 - **Homepage banner:** Anagami.bg accounting services GIF banner added as last card in the tools grid (`/img/anagami-banner.gif`), links to `https://www.anagami.bg/uslugi/schetovodno-obslujvane/`.
 - **Deployment gotcha:** Container loses custom files on recreation. Always run full rsync + docker cp before build (see Deployment Steps above).
 - **Digital signature compatibility:** `-dOmitID=true` must NOT be used in Ghostscript compression commands — it removes the PDF Document ID which is required by external digital signing services (Adobe Sign, Evrotrust, eID, etc.). The compress-pdf.js command uses `-dOmitXMP=true` but preserves the Document ID intentionally.

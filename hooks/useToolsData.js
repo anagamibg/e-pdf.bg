@@ -130,6 +130,20 @@ const useToolsData = () => {
       URI: "/extract-pdf-pages",
     },
 
+    SplitPDFTool: {
+      key: "SplitPDF",
+      title: t("common:tool_name_split_pdf"),
+      description: t("common:tool_desc_split_pdf"),
+      href: "/split-pdf",
+      icon: <FileEarmarkPdf />,
+      acceptedInputMimeType: "application/pdf",
+      acceptedInputFileMaxSize: 26214400, //25MB = 25600 KB (in binary) = 26214400 B (in binary),
+      newFileNameSuffix: "_split.zip",
+      outputFileMimeType: "application/zip",
+      thumbnailImageURL: "",
+      URI: "/split-pdf",
+    },
+
     RepairPDFTool: {
       key: "RepairPDF",
       title: t("common:tool_name_repair_pdf"),

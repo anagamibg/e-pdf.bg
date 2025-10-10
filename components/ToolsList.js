@@ -40,6 +40,12 @@ const ToolsList = React.memo(function ToolsList() {
           url={toolsData["EditPDFTool"].href}
           icon={toolsData["EditPDFTool"].icon}
         />
+
+        <NavItem
+          title={toolsData["SplitPDFTool"].title}
+          url={toolsData["SplitPDFTool"].href}
+          icon={toolsData["SplitPDFTool"].icon}
+        />
       </div>
 
       <div className="dropdown_item">
