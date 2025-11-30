@@ -12,31 +12,23 @@ import {
   ExclamationTriangle,
 } from "react-bootstrap-icons";
 import { useTranslation } from "next-i18next";
-import DocumentPreview from "../components/DocumentPreview";
-import {
-  handleFileSelection,
-  uploadFiles,
-  saveNewFiles,
-  downloadFiles,
-} from "../helpers/utils.js";
-
+import { handlePreventDefault, download, notify } from "../helpers/utils.js";
 import styles from "../styles/UploadContainer.module.css";
 import Steps from "../components/Steps";
 import Features from "../components/Features";
-import ProcessingFilesFormStep from "../components/ProcessingFilesFormStep";
-import UploadingFilesFormStep from "../components/UploadingFilesFormStep";
 import DownloadFilesFormStep from "../components/DownloadFilesFormStep";
 import UploadAreaFormStep from "../components/UploadAreaFormStep";
-import EditFilesFormStep from "../components/EditFilesFormStep";
-import SelectOptionFormStep from "../components/SelectOptionFormStep";
-import Option from "../components/Option";
-import useUploadStats from "../hooks/useUploadStats";
-import useDocuments from "../hooks/useDocuments";
 import useToolsData from "../hooks/useToolsData";
 import Alerts from "../components/Alerts";
 import pageStyles from "../styles/Page.module.css";
 import SeoSchema from "../components/SeoSchema";
 import StarRating from "../components/StarRating";
+import dynamic from "next/dynamic";
+
+const PDFLightenEditor = dynamic(
+  () => import("../components/PDFLightenEditor"),
+  { ssr: false }
+);
 
 export async function getStaticProps({ locale }) {
   return {
@@ -48,169 +40,35 @@ export async function getStaticProps({ locale }) {
 
 const LightenPDFPage = () => {
   const { LightenPDFTool } = useToolsData();
-  const {
-    currentUploadingFile,
-    currentUploadedFilesCounter,
-    currentProcessedFilesCounter,
-    totalUploadingProgress,
-    uploadSpeed,
-    uploadTimeLeft,
-    resultsInfoVisibility,
-    resultsErrors,
-    handleResetInitialUploadState,
-    handleResetCurrentUploadingStatus,
-    handleUpdateCurrentUploadingStatus,
-    handleUpdateResultsDisplay,
-    handleResetCurrentProcessingStatus,
-    handleUpdateCurrentProcessingStatus,
-  } = useUploadStats();
-
-  const {
-    documents,
-    handleAddDocument,
-    handleUpdateDocument,
-    handleDeleteDocument,
-    handleResetInitialDocumentsState,
-  } = useDocuments();
-
-  const { t } = useTranslation();
-
   const mountedRef = useRef(false);
   const [isSpinnerActive, setIsSpinnerActive] = useState(false);
   const [formStep, setFormStep] = useState(0);
+  // 0: Upload, 1: Editor (canvas + filters), 2: Download
   const [loadedFilesCount, setLoadedFilesCount] = useState(0);
-  const [requestSignal, setRequestSignal] = useState();
-  const [lightenLevel, setLightenLevel] = useState(2);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfFileName, setPdfFileName] = useState("");
+  const [resultBlob, setResultBlob] = useState(null);
+  const [hasError, setHasError] = useState(false);
   const [liveRating, setLiveRating] = useState({
     ratingValue: "5.0",
     ratingCount: "3",
   });
-
-  const handleChange = (event) => {
-    handleFileSelection(
-      event,
-      setLoadedFilesCount,
-      handleAddDocument,
-      t,
-      mountedRef,
-      LightenPDFTool
-    );
-  };
-
-  const handleLightenFiles = async () => {
-    handleResetCurrentUploadingStatus();
-    handleResetCurrentProcessingStatus();
-
-    setFormStep(3);
-
-    const data = {
-      lightenLevel: lightenLevel,
-    };
-
-    const { uploadResponsesArray, uploadResponsesUnsuccessfulRequests } =
-      await uploadFiles({
-        signal: requestSignal,
-        documents: documents,
-        handleUpdateCurrentUploadingStatus: handleUpdateCurrentUploadingStatus,
-        uri: LightenPDFTool.URI,
-        data: data,
-      });
-
-    setFormStep(4);
-
-    const { downloadResponsesArray, downloadResponsesUnsuccessfulRequests } =
-      await downloadFiles({
-        responseMimeType: LightenPDFTool.outputFileMimeType,
-        signal: requestSignal,
-        uploadResponsesArray: uploadResponsesArray,
-        handleUpdateDocument: handleUpdateDocument,
-        handleUpdateCurrentProcessingStatus:
-          handleUpdateCurrentProcessingStatus,
-      });
-
-    const failedFiles = [
-      ...uploadResponsesUnsuccessfulRequests,
-      ...downloadResponsesUnsuccessfulRequests,
-    ];
-    const successfullyProcessedFiles = [...downloadResponsesArray];
-
-    if (successfullyProcessedFiles.length === documents.length) {
-      handleUpdateResultsDisplay(true, []);
-    } else {
-      if (failedFiles.length === documents.length) {
-        handleUpdateResultsDisplay(false, failedFiles);
-      } else {
-        handleUpdateResultsDisplay(true, failedFiles);
-      }
-    }
-
-    setFormStep(5);
-  };
-
-  const handleHandleResetInitialStates = () => {
-    handleResetInitialDocumentsState();
-    handleResetInitialUploadState();
-    setLightenLevel(2);
-    setFormStep(0);
-  };
-
-  const handleDownload = () => {
-    saveNewFiles(documents);
-  };
+  const { t } = useTranslation();
 
   useEffect(() => {
     mountedRef.current = true;
-    const controller = new AbortController();
-    const signal = controller.signal;
-    setRequestSignal(signal);
     return () => {
-      controller.abort();
       mountedRef.current = false;
     };
   }, []);
 
   useEffect(() => {
     if (loadedFilesCount > 0) {
-      if (mountedRef.current) {
-        setIsSpinnerActive(true);
-      }
+      if (mountedRef.current) setIsSpinnerActive(true);
     } else {
-      if (mountedRef.current) {
-        setIsSpinnerActive(false);
-      }
+      if (mountedRef.current) setIsSpinnerActive(false);
     }
   }, [loadedFilesCount]);
-
-  const pagesComponentsArray = (
-    <div className={`${styles.previewer_content} d-flex flex-wrap`}>
-      {documents.map((doc) => {
-        return (
-          <DocumentPreview
-            key={"doc-" + doc.id}
-            id={doc.id}
-            blob={doc.inputBlob}
-            fileName={doc.fileName}
-            width={doc.width}
-            height={doc.height}
-            degree={doc.previewRotation}
-            numberOfPages={doc.numberOfPages}
-            handleDeleteDocument={(event) => {
-              event.preventDefault();
-              handleDeleteDocument(doc.id);
-            }}
-          />
-        );
-      })}
-    </div>
-  );
-
-  useEffect(() => {
-    if (documents.length <= 0) {
-      setFormStep(0);
-    } else {
-      setFormStep(1);
-    }
-  }, [documents.length]);
 
   useEffect(() => {
     fetch("/api/get-ratings")
@@ -225,6 +83,69 @@ const LightenPDFPage = () => {
       })
       .catch(() => {});
   }, []);
+
+  const handleChange = (event) => {
+    event.preventDefault();
+    let files;
+    if (typeof event.dataTransfer === "undefined") {
+      files = event.target.files;
+    } else {
+      files = event.dataTransfer.files;
+    }
+
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    const { name: fileName, size: fileSize, type: fileType } = file;
+
+    if (!fileType.includes("application/pdf")) {
+      notify("warning", t("common:file_extension_error"));
+      return;
+    }
+
+    if (fileSize > LightenPDFTool.acceptedInputFileMaxSize) {
+      notify("warning", t("common:file_extension_error"));
+      return;
+    }
+
+    if (mountedRef.current) setLoadedFilesCount(1);
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = () => {
+      if (mountedRef.current) {
+        const blob = new Blob([reader.result], { type: "application/pdf" });
+        setPdfFile(blob);
+        setPdfFileName(fileName);
+        setFormStep(1);
+        setLoadedFilesCount(0);
+      }
+    };
+    reader.onerror = () => {
+      notify("error", t("common:file_load_error"));
+      if (mountedRef.current) setLoadedFilesCount(0);
+    };
+  };
+
+  const handleSaveResult = (blob) => {
+    setResultBlob(blob);
+    setFormStep(2);
+  };
+
+  const handleDownload = () => {
+    if (resultBlob) {
+      const newName = pdfFileName.replace(/\.pdf$/i, "_lightened.pdf");
+      download(resultBlob, newName);
+    }
+  };
+
+  const handleReset = () => {
+    setPdfFile(null);
+    setPdfFileName("");
+    setResultBlob(null);
+    setHasError(false);
+    setFormStep(0);
+  };
 
   return (
     <>
@@ -260,126 +181,39 @@ const LightenPDFPage = () => {
         <section className="page_section mt-0">
           <article className="container">
             <section className={pageStyles.tool_container_wrapper}>
+              {/* Step 0: Upload */}
               {formStep === 0 && (
                 <UploadAreaFormStep
                   handleChange={handleChange}
                   isSpinnerActive={isSpinnerActive}
-                  isMultipleInput={true}
-                  acceptedMimeType={LightenPDFTool.acceptedInputMimeType}
+                  isMultipleInput={false}
+                  acceptedMimeType="application/pdf"
                 />
               )}
 
-              {formStep === 1 && (
-                <EditFilesFormStep
-                  acceptedMimeType={LightenPDFTool.acceptedInputMimeType}
-                  files={documents}
-                  enableAddingMoreFiles={true}
-                  filesComponents={pagesComponentsArray}
-                  handleChange={handleChange}
-                  isSpinnerActive={isSpinnerActive}
-                  isMultipleInput={true}
-                  isFilesSelectionActive={false}
-                  isPanelTopSticky={false}
-                  isPanelBottomSticky={false}
-                  positionPanelBottomItems={styles.centered}
-                  deleteFiles={handleResetInitialDocumentsState}
-                  action={() => setFormStep(2)}
-                  actionTitle={t("lighten-pdf:select_lighten_level")}
+              {/* Step 1: Lighten Editor with real-time preview */}
+              {formStep === 1 && pdfFile && (
+                <PDFLightenEditor
+                  pdfDocument={pdfFile}
+                  onSave={handleSaveResult}
+                  fileName={pdfFileName}
                 />
               )}
 
+              {/* Step 2: Download */}
               {formStep === 2 && (
-                <SelectOptionFormStep
-                  title={t("lighten-pdf:select_lighten_level_title")}
-                  action={handleLightenFiles}
-                  actionTitle={t("lighten-pdf:lighten_pdf")}
-                >
-                  <Option
-                    onChange={() => setLightenLevel(1)}
-                    isChecked={lightenLevel === 1}
-                    value="light"
-                  >
-                    <span>{t("lighten-pdf:light_lighten")}</span>
-                    <span className={`${styles.pdf_to_image_option_desc}`}>
-                      {t("lighten-pdf:light_lighten_desc")}
-                    </span>
-                  </Option>
-
-                  <Option
-                    onChange={() => setLightenLevel(2)}
-                    isChecked={lightenLevel === 2}
-                    value="medium"
-                  >
-                    <span>
-                      {t("lighten-pdf:medium_lighten")} (
-                      {t("lighten-pdf:recommended")})
-                    </span>
-                    <span className={`${styles.pdf_to_image_option_desc}`}>
-                      {t("lighten-pdf:medium_lighten_desc")}
-                    </span>
-                  </Option>
-
-                  <Option
-                    onChange={() => setLightenLevel(3)}
-                    isChecked={lightenLevel === 3}
-                    value="strong"
-                  >
-                    <span>{t("lighten-pdf:strong_lighten")}</span>
-                    <span className={`${styles.pdf_to_image_option_desc}`}>
-                      {t("lighten-pdf:strong_lighten_desc")}
-                    </span>
-                  </Option>
-                </SelectOptionFormStep>
-              )}
-
-              {formStep === 3 && (
-                <UploadingFilesFormStep
-                  title={`${t(
-                    "common:uploading_file"
-                  )} ${currentUploadedFilesCounter} ${t("common:of")} ${
-                    documents.length
-                  }`}
-                  uploadTimeLeft={uploadTimeLeft}
-                  uploadSpeed={uploadSpeed}
-                  totalUploadingProgress={totalUploadingProgress}
-                  currentUploadingFileName={currentUploadingFile?.fileName}
-                  currentUploadingFileSize={
-                    currentUploadingFile?.inputBlob.size
-                  }
-                />
-              )}
-
-              {formStep === 4 && (
-                <ProcessingFilesFormStep
-                  progress={`${t(
-                    "common:processing"
-                  )} ${currentProcessedFilesCounter} ${t("common:of")} ${
-                    documents.length
-                  }`}
-                />
-              )}
-
-              {formStep === 5 && (
                 <DownloadFilesFormStep
-                  title={
-                    documents.length === 1
-                      ? t("common:your_document_is_ready")
-                      : documents.length > 1
-                      ? t("common:your_documents_are_ready")
-                      : ""
-                  }
+                  title={t("common:your_document_is_ready")}
                   handleDownload={handleDownload}
-                  handleResetInitialState={handleHandleResetInitialStates}
+                  handleResetInitialState={handleReset}
                 >
-                  {resultsInfoVisibility && (
-                    <div className="row w-100 d-flex justify-content-center text-center mt-5 mb-5">
-                      <Check2Circle size={130} color="#2a74ed" />
-                    </div>
-                  )}
-                  {resultsErrors.length > 0 && (
+                  <div className="row w-100 d-flex justify-content-center text-center mt-5 mb-5">
+                    <Check2Circle size={130} color="#2a74ed" />
+                  </div>
+                  {hasError && (
                     <Alerts
                       message={t("common:files_error")}
-                      filesData={resultsErrors}
+                      filesData={[]}
                       type="error"
                       icon={<ExclamationTriangle size={22} />}
                     />
