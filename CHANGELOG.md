@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-02-20
+
+### Added
+- **Lighten PDF tool** (`/lighten-pdf`) — fully client-side tool to brighten and enhance scanned documents and photos of documents
+  - Real-time preview: pdf.js renders PDF pages to canvas, CSS `filter` property applies brightness/contrast/saturation instantly as user adjusts sliders
+  - **4 adjustment filters:** Brightness (50–250%), Contrast (50–200%), Saturation (0–200%), Sharpness (0–100%)
+  - **4 presets:** Scanned Document, Photo, Faded, High Contrast — one-click corrections for common use cases
+  - Sharpness filter uses unsharp mask via canvas pixel manipulation (blur difference blending)
+  - Saving via pdf-lib: renders each page at 2× resolution through filtered canvas to PNG, embeds in new PDF preserving original page dimensions
+  - Multi-page navigation with zoom controls
+  - No server upload required — all processing happens in the browser
+  - `PDFLightenEditor` component (`components/PDFLightenEditor.js`) with dedicated CSS Module
+  - Dynamic import with `ssr: false` to avoid SSR issues with canvas/pdfjs
+  - Full BG/EN localization, star ratings, SEO schema
+  - Added to navigation under "Optimize & Extract" group
+
 ## [1.5.0] - 2026-02-20
 
 ### Added
