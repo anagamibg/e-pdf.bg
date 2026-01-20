@@ -3,7 +3,7 @@
 ## Project Overview
 **e-pdf.bg** is a free online PDF tools web application built with Next.js. It allows users to merge, compress, convert, edit, protect, and unlock PDF files. The site supports Bulgarian (bg, default) and English (en) localization.
 
-**Version:** 1.6.0
+**Version:** 1.7.0
 **Live URL:** https://e-pdf.bg
 
 ## Tech Stack
@@ -11,9 +11,9 @@
 - **Styling:** CSS Modules + Global CSS with CSS custom properties
 - **i18n:** next-i18next (bg default, en)
 - **PDF Processing:**
-  - Client-side: `pdf-lib` v1.17.1 (text/image embedding, lighten PDF save), `react-pdf` v8.0.2 (rendering)
+  - Client-side: `pdf-lib` v1.17.1 (text/image embedding, lighten PDF save, crop PDF CropBox/MediaBox manipulation), `react-pdf` v8.0.2 (rendering)
   - Server-side: Ghostscript (compression, grayscale, split PDF), qpdf (protect/unlock, page counting), LibreOffice (office conversions), Python pdfplumber+openpyxl (PDF→Excel), Python openpyxl row-height fix (Excel→PDF pre-processing)
-  - `pdfjs-dist` loaded from CDN (3.11.174) for PDF Editor and Lighten PDF canvas rendering
+  - `pdfjs-dist` loaded from CDN (3.11.174) for PDF Editor, Lighten PDF, and Crop PDF canvas rendering
 - **File Handling:** formidable (uploads), jszip (zip), pdfkit (image→PDF)
 - **UI:** react-bootstrap-icons, react-toastify, react-dnd, react-selecto
 
@@ -50,10 +50,10 @@ Most tool pages follow a consistent form step pattern:
 - **Step 4:** Processing (ProcessingFilesFormStep)
 - **Step 5:** Download (DownloadFilesFormStep)
 
-### Client-Side Tool Pattern (Edit PDF, Lighten PDF)
+### Client-Side Tool Pattern (Edit PDF, Lighten PDF, Crop PDF)
 Client-side tools process entirely in the browser:
 - **Step 0:** Upload
-- **Step 1:** Canvas-based editor (PDFEditor / PDFLightenEditor component, pdf.js for rendering, pdf-lib for saving)
+- **Step 1:** Canvas-based editor (PDFEditor / PDFLightenEditor / PDFCropEditor component, pdf.js for rendering, pdf-lib for saving)
 - **Step 2:** Download
 
 ### API Endpoint Pattern
@@ -151,6 +151,7 @@ certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --emai
 | `components/Nav.js` | Header navigation with sticky positioning; includes inline language dropdown |
 | `components/PDFEditor.js` | PDF editor with HTML text layer overlay for inline editing of existing PDF text + canvas tools for images/erasers/signatures |
 | `components/PDFLightenEditor.js` | Lighten PDF editor — client-side canvas preview with real-time CSS filters (brightness, contrast, saturation, sharpness) + pdf-lib save |
+| `components/PDFCropEditor.js` | Crop PDF editor — client-side canvas preview with draggable crop rectangle + pdf-lib CropBox/MediaBox/TrimBox manipulation for lossless cropping |
 | `components/SeoSchema.js` | Reusable JSON-LD structured data; accepts optional `aggregateRating` prop for AggregateRating schema |
 | `components/StarRating.js` | Star rating widget (1–5★); localStorage deduplication (1 vote/user/tool) |
 | `styles/StarRating.module.css` | Styles for StarRating component |
@@ -189,7 +190,8 @@ npm run lint   # ESLint
 - **Language switcher:** Inline dropdown in nav (no modal). `LangModal.js` and `LangModal.module.css` removed. Styles live in `MegaMenu.module.css` under `.lang_dropdown*` classes.
 - **Split PDF tool:** Server-side tool using Ghostscript + qpdf. Supports two modes: "Split all pages" (each page as separate PDF) and "Split by ranges" (user-defined ranges like 1-3, 4-6). Uses `saveDataToJsonForSplit()` and `runSplitPDFCommand()` in `files-repo.js`. Output is a ZIP file. Page previews shown client-side via `handleExtractPagesFileSelection()`.
 - **Lighten PDF tool:** Fully client-side tool (`components/PDFLightenEditor.js`). Uses pdf.js CDN to render PDF pages to canvas, applies CSS `filter` property (`brightness()`, `contrast()`, `saturate()`) for real-time preview, and saves via pdf-lib by rendering each page through a filtered canvas to PNG then embedding in a new PDF. 4 presets (Scanned Doc, Photo, Faded, High Contrast) + 4 manual sliders (Brightness, Contrast, Saturation, Sharpness). Sharpness uses unsharp mask via canvas pixel manipulation. Dynamic import with `ssr: false`. No server-side processing needed. Legacy `pages/api/lighten-pdf.js` endpoint exists but is unused.
-- **Star ratings:** All 30 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
+- **Crop PDF tool:** Fully client-side tool (`components/PDFCropEditor.js`). Uses pdf.js CDN to render PDF pages to canvas for preview, overlays a draggable crop rectangle with 8 resize handles (4 corners + 4 edge midpoints) and semi-transparent dark masks. Margin input fields (Top/Right/Bottom/Left) with unit selector (mm/pt/in) for precise control, bidirectionally synced with the visual crop rectangle. "Apply to all pages" checkbox for uniform cropping. Saves via pdf-lib by setting MediaBox + CropBox + TrimBox on each page — **lossless vector output** (text stays searchable, links/annotations preserved, no rasterization). Coordinate conversion: PDF points ↔ display pixels via ratio mapping. Dynamic import with `ssr: false`. No server-side processing needed.
+- **Star ratings:** All 31 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
 - **Homepage banner:** Anagami.bg accounting services GIF banner added as last card in the tools grid (`/img/anagami-banner.gif`), links to `https://www.anagami.bg/uslugi/schetovodno-obslujvane/`.
 - **Deployment gotcha:** Container loses custom files on recreation. Always run full rsync + docker cp before build (see Deployment Steps above).
 - **Digital signature compatibility:** `-dOmitID=true` must NOT be used in Ghostscript compression commands — it removes the PDF Document ID which is required by external digital signing services (Adobe Sign, Evrotrust, eID, etc.). The compress-pdf.js command uses `-dOmitXMP=true` but preserves the Document ID intentionally.

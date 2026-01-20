@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-02-20
+
+### Added
+- **Crop PDF tool** (`/crop-pdf`) — fully client-side tool to crop and trim PDF page margins
+  - Interactive visual crop editor with draggable handles (8 resize handles: 4 corners + 4 edge midpoints)
+  - Semi-transparent dark overlay mask shows areas being removed in real-time
+  - Precise margin input fields (Top, Right, Bottom, Left) with unit selection (mm, pt, in)
+  - "Apply to all pages" checkbox for uniform cropping across all pages
+  - Per-page crop support when checkbox is unchecked
+  - Lossless vector-quality output using pdf-lib MediaBox/CropBox/TrimBox manipulation — text remains searchable and selectable, links and annotations preserved
+  - Multi-page navigation with zoom controls
+  - No server upload required — all processing happens in the browser
+  - `PDFCropEditor` component (`components/PDFCropEditor.js`) with dedicated CSS Module
+  - Dynamic import with `ssr: false` to avoid SSR issues with canvas/pdfjs
+  - Full BG/EN localization, star ratings, SEO schema
+  - Added to navigation under "Merge & Edit" group
+
 ## [1.6.0] - 2026-02-20
 
 ### Added

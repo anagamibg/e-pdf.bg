@@ -42,6 +42,12 @@ const ToolsList = React.memo(function ToolsList() {
         />
 
         <NavItem
+          title={toolsData["CropPDFTool"].title}
+          url={toolsData["CropPDFTool"].href}
+          icon={toolsData["CropPDFTool"].icon}
+        />
+
+        <NavItem
           title={toolsData["SplitPDFTool"].title}
           url={toolsData["SplitPDFTool"].href}
           icon={toolsData["SplitPDFTool"].icon}

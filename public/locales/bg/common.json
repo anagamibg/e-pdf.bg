@@ -106,6 +106,8 @@
   "tool_desc_unlock_pdf": "Премахнете паролата от защитени PDF файлове",
   "tool_name_edit_pdf": "Редактиране на PDF",
   "tool_desc_edit_pdf": "Добавяйте текст и снимки към вашите PDF файлове",
+  "tool_name_crop_pdf": "Изрязване на PDF",
+  "tool_desc_crop_pdf": "Изрежете и подравнете PDF страници, за да премахнете нежелани полета или бяло пространство",
   "processing": "Обработка на PDF",
   "convert_to_pdf": "Конвертирай в PDF",
   "images_extraction_is_complete": "Извличането на изображения е завършено!",

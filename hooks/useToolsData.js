@@ -12,6 +12,7 @@ import {
   Lock,
   Unlock,
   PencilSquare,
+  Crop,
 } from "react-bootstrap-icons";
 import { useTranslation } from "next-i18next";
 const useToolsData = () => {
@@ -128,6 +129,20 @@ const useToolsData = () => {
       outputFileMimeType: "application/pdf",
       thumbnailImageURL: "",
       URI: "/lighten-pdf",
+    },
+
+    CropPDFTool: {
+      key: "CropPDF",
+      title: t("common:tool_name_crop_pdf"),
+      description: t("common:tool_desc_crop_pdf"),
+      href: "/crop-pdf",
+      icon: <Crop />,
+      acceptedInputMimeType: "application/pdf",
+      acceptedInputFileMaxSize: 26214400, //25MB
+      newFileNameSuffix: "_cropped.pdf",
+      outputFileMimeType: "application/pdf",
+      thumbnailImageURL: "",
+      URI: "/crop-pdf",
     },
 
     ExtractPagesTool: {

@@ -106,6 +106,8 @@
   "tool_desc_unlock_pdf": "Remove password from your protected PDF files",
   "tool_name_edit_pdf": "Edit PDF",
   "tool_desc_edit_pdf": "Add text and images to your PDF files",
+  "tool_name_crop_pdf": "Crop PDF",
+  "tool_desc_crop_pdf": "Crop and trim PDF pages to remove unwanted margins or whitespace",
   "processing": "Processing PDF",
   "convert_to_pdf": "Convert To PDF",
   "images_extraction_is_complete": "Your image(s) extraction is complete!",
