@@ -271,6 +271,10 @@
     font-size: 13px;
   }
 
+  .btn_primary :global(.lang_label) {
+    display: none;
+  }
+
   .nav_action {
     gap: 0.3rem;
   }
