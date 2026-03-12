@@ -180,6 +180,11 @@ npm run start  # Production server (NODE_ENV=production node app.js)
 npm run lint   # ESLint
 ```
 
+## Git Commits
+- Never add co-authors to commits
+- Never add "Co-authored-by" trailer
+- Use only: `git commit -m "message"`
+
 ## Important Notes
 - **Sticky header:** Uses `position: sticky` on `<header>` element. Requires `overflow-x: clip` (not `hidden`) on body.
 - **Base font:** `html { font-size: 16px }`, `body { font-size: 16px; font-weight: 300; line-height: 1.5 }`, `.article_content { font-size: 16px; font-weight: 300; line-height: 24px }`
@@ -192,7 +197,8 @@ npm run lint   # ESLint
 - **Lighten PDF tool:** Fully client-side tool (`components/PDFLightenEditor.js`). Uses pdf.js CDN to render PDF pages to canvas, applies CSS `filter` property (`brightness()`, `contrast()`, `saturate()`) for real-time preview, and saves via pdf-lib by rendering each page through a filtered canvas to PNG then embedding in a new PDF. 4 presets (Scanned Doc, Photo, Faded, High Contrast) + 4 manual sliders (Brightness, Contrast, Saturation, Sharpness). Sharpness uses unsharp mask via canvas pixel manipulation. Dynamic import with `ssr: false`. No server-side processing needed. Legacy `pages/api/lighten-pdf.js` endpoint exists but is unused.
 - **Crop PDF tool:** Fully client-side tool (`components/PDFCropEditor.js`). Uses pdf.js CDN to render PDF pages to canvas for preview, overlays a draggable crop rectangle with 8 resize handles (4 corners + 4 edge midpoints) and semi-transparent dark masks. Margin input fields (Top/Right/Bottom/Left) with unit selector (mm/pt/in) for precise control, bidirectionally synced with the visual crop rectangle. "Apply to all pages" checkbox for uniform cropping. Saves via pdf-lib by setting MediaBox + CropBox + TrimBox on each page — **lossless vector output** (text stays searchable, links/annotations preserved, no rasterization). Coordinate conversion: PDF points ↔ display pixels via ratio mapping. Dynamic import with `ssr: false`. No server-side processing needed.
 - **Star ratings:** All 31 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
-- **Homepage search:** Live search bar on the homepage (`pages/index.js`) filters tools in real-time by title, description, and key. Uses `useState` + `useMemo` for instant filtering. Search icon from `react-bootstrap-icons`. Styles in `styles/index.module.css` (`.search_wrapper` max-width 720px, `.search_input`, `.search_icon`, `.search_no_results`). Translations: `search_placeholder` and `search_no_results` in `common.json`. Banner is hidden during active search.
+- **Homepage search:** Live search bar on the homepage (`pages/index.js`) filters tools in real-time by title, description, and key. Uses `useState` + `useMemo` for instant filtering. Search icon from `react-bootstrap-icons`. Styles in `styles/index.module.css` (`.search_wrapper` max-width 720px, `.search_input`, `.search_icon`, `.search_no_results`). Translations: `search_placeholder` and `search_no_results` in `common.json`. Banner is hidden during active search. The nav dropdown menu (`ToolsList.js`) also has its own search bar at the top with the same filtering logic — styles: `.menu_search_wrapper`, `.menu_search_input`, `.menu_search_icon`, `.menu_no_results` in `MegaMenu.module.css`.
+- **Mobile nav:** On ≤840px the dropdown is scrollable (`max-height: calc(100vh - var(--nav-height)); overflow-y: auto`). Items are compact (0.5rem margin, 13px font). Logo is 40px on all mobile sizes.
 - **Homepage banner:** Anagami.bg accounting services GIF banner added as last card in the tools grid (`/img/anagami-banner.gif`), links to `https://www.anagami.bg/uslugi/schetovodno-obslujvane/`.
 - **Deployment gotcha:** Container loses custom files on recreation. Always run full rsync + docker cp before build (see Deployment Steps above).
 - **Digital signature compatibility:** `-dOmitID=true` must NOT be used in Ghostscript compression commands — it removes the PDF Document ID which is required by external digital signing services (Adobe Sign, Evrotrust, eID, etc.). The compress-pdf.js command uses `-dOmitXMP=true` but preserves the Document ID intentionally.

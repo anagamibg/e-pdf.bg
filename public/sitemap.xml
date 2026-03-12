@@ -4,7 +4,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://e-pdf.bg</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg"/>
@@ -13,7 +13,7 @@
   </url>
   <url>
     <loc>https://e-pdf.bg/en</loc>
-    <lastmod>2026-02-18</lastmod>
+    <lastmod>2026-02-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg"/>
@@ -523,6 +523,96 @@
     <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/pdf-to-zip"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/pdf-to-zip"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/pdf-to-zip"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/lighten-pdf</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/lighten-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/lighten-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/lighten-pdf"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/en/lighten-pdf</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/lighten-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/lighten-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/lighten-pdf"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/crop-pdf</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/crop-pdf"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/en/crop-pdf</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/crop-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/crop-pdf"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/split-pdf</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/split-pdf"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/en/split-pdf</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/split-pdf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/split-pdf"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/privacy-policy</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/privacy-policy"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/en/privacy-policy</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/privacy-policy"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/terms-of-use</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/terms-of-use"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/terms-of-use"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/terms-of-use"/>
+  </url>
+  <url>
+    <loc>https://e-pdf.bg/en/terms-of-use</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://e-pdf.bg/terms-of-use"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://e-pdf.bg/en/terms-of-use"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://e-pdf.bg/terms-of-use"/>
   </url>
   <url>
     <loc>https://e-pdf.bg/about</loc>
