@@ -3,7 +3,7 @@
 ## Project Overview
 **e-pdf.bg** is a free online PDF tools web application built with Next.js. It allows users to merge, compress, convert, edit, protect, and unlock PDF files. The site supports Bulgarian (bg, default) and English (en) localization.
 
-**Version:** 1.7.0
+**Version:** 1.8.0
 **Live URL:** https://e-pdf.bg
 
 ## Tech Stack
@@ -192,6 +192,7 @@ npm run lint   # ESLint
 - **Lighten PDF tool:** Fully client-side tool (`components/PDFLightenEditor.js`). Uses pdf.js CDN to render PDF pages to canvas, applies CSS `filter` property (`brightness()`, `contrast()`, `saturate()`) for real-time preview, and saves via pdf-lib by rendering each page through a filtered canvas to PNG then embedding in a new PDF. 4 presets (Scanned Doc, Photo, Faded, High Contrast) + 4 manual sliders (Brightness, Contrast, Saturation, Sharpness). Sharpness uses unsharp mask via canvas pixel manipulation. Dynamic import with `ssr: false`. No server-side processing needed. Legacy `pages/api/lighten-pdf.js` endpoint exists but is unused.
 - **Crop PDF tool:** Fully client-side tool (`components/PDFCropEditor.js`). Uses pdf.js CDN to render PDF pages to canvas for preview, overlays a draggable crop rectangle with 8 resize handles (4 corners + 4 edge midpoints) and semi-transparent dark masks. Margin input fields (Top/Right/Bottom/Left) with unit selector (mm/pt/in) for precise control, bidirectionally synced with the visual crop rectangle. "Apply to all pages" checkbox for uniform cropping. Saves via pdf-lib by setting MediaBox + CropBox + TrimBox on each page — **lossless vector output** (text stays searchable, links/annotations preserved, no rasterization). Coordinate conversion: PDF points ↔ display pixels via ratio mapping. Dynamic import with `ssr: false`. No server-side processing needed.
 - **Star ratings:** All 31 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
+- **Homepage search:** Live search bar on the homepage (`pages/index.js`) filters tools in real-time by title, description, and key. Uses `useState` + `useMemo` for instant filtering. Search icon from `react-bootstrap-icons`. Styles in `styles/index.module.css` (`.search_wrapper`, `.search_input`, `.search_icon`, `.search_no_results`). Translations: `search_placeholder` and `search_no_results` in `common.json`. Banner is hidden during active search.
 - **Homepage banner:** Anagami.bg accounting services GIF banner added as last card in the tools grid (`/img/anagami-banner.gif`), links to `https://www.anagami.bg/uslugi/schetovodno-obslujvane/`.
 - **Deployment gotcha:** Container loses custom files on recreation. Always run full rsync + docker cp before build (see Deployment Steps above).
 - **Digital signature compatibility:** `-dOmitID=true` must NOT be used in Ghostscript compression commands — it removes the PDF Document ID which is required by external digital signing services (Adobe Sign, Evrotrust, eID, etc.). The compress-pdf.js command uses `-dOmitXMP=true` but preserves the Document ID intentionally.

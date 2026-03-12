@@ -37,6 +37,8 @@
   "extract": "Extract",
   "page_header_text": "Your Favorite PDF Tools In One Place! All are 100% FREE and easy to use!",
   "page_header_title": "Simple & Reliable PDF Tools",
+  "search_placeholder": "Search for a tool... (e.g. merge, compress, convert)",
+  "search_no_results": "No tools found",
   "tool_group_merge_&_edit": "Merge & Edit",
   "tool_name_merge_pdf": "Merge PDF",
   "tool_name_rotate_pdf": "Rotate PDF",

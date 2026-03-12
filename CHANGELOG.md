@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-02-20
+
+### Added
+- **Homepage live search** — instant search bar below the page title that filters tools in real-time
+  - Searches by tool title, description, and key
+  - Bulgarian and English placeholder text and "no results" message
+  - Search icon from `react-bootstrap-icons`
+  - Banner hidden during active search for clean results
+  - Uses `useState` + `useMemo` for performant client-side filtering
+
 ## [1.7.0] - 2026-02-20
 
 ### Added
