@@ -21,6 +21,7 @@
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
     "axios": "^1.9.0",
+    "better-sqlite3": "^12.6.2",
     "formidable": "^2.1.1",
     "jimp": "^0.22.8",
     "jszip": "^3.10.1",

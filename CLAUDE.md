@@ -14,6 +14,7 @@
   - Client-side: `pdf-lib` v1.17.1 (text/image embedding, lighten PDF save, crop PDF CropBox/MediaBox manipulation), `react-pdf` v8.0.2 (rendering)
   - Server-side: Ghostscript (compression, grayscale, split PDF), qpdf (protect/unlock, page counting), LibreOffice (office conversions), Python pdfplumber+openpyxl (PDF→Excel), Python openpyxl row-height fix (Excel→PDF pre-processing)
   - `pdfjs-dist` loaded from CDN (3.11.174) for PDF Editor, Lighten PDF, and Crop PDF canvas rendering
+- **Database:** `better-sqlite3` for star ratings (SQLite, single file at `data/ratings.db`, WAL mode)
 - **File Handling:** formidable (uploads), jszip (zip), pdfkit (image→PDF)
 - **UI:** react-bootstrap-icons, react-toastify, react-dnd, react-selecto
 
@@ -91,7 +92,7 @@ rsync -avz --exclude='.git' --exclude='node_modules' --exclude='.next' \
   /Users/tsvet/Documents/Projects/e-pdf.bg/pdf-tools/ \
   root@e-pdf.bg:/root/pdf-tools/
 
-# 2. Copy all directories into Docker container
+# 2. Copy all directories into Docker container (DO NOT copy data/ — ratings.db lives there)
 ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "
   docker cp /root/pdf-tools/components/. epdf-container:/app/components/ && \
   docker cp /root/pdf-tools/styles/. epdf-container:/app/styles/ && \
@@ -99,13 +100,15 @@ ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "
   docker cp /root/pdf-tools/hooks/. epdf-container:/app/hooks/ && \
   docker cp /root/pdf-tools/helpers/. epdf-container:/app/helpers/ && \
   docker cp /root/pdf-tools/public/. epdf-container:/app/public/ && \
-  docker exec epdf-container mkdir -p /app/data && \
-  docker cp /root/pdf-tools/data/ratings.json epdf-container:/app/data/ratings.json
+  docker exec epdf-container mkdir -p /app/data
 "
 
-# 3. Clear cache and rebuild
+# 3. Install new dependencies (if package.json changed) + clear cache and rebuild
 ssh -i ~/.ssh/hetzner_key root@e-pdf.bg \
-  "docker exec epdf-container rm -rf /app/.next && docker exec epdf-container npm run build"
+  "docker cp /root/pdf-tools/package.json epdf-container:/app/package.json && \
+   docker exec epdf-container npm install && \
+   docker exec epdf-container rm -rf /app/.next && \
+   docker exec epdf-container npm run build"
 
 # 4. Restart container
 ssh -i ~/.ssh/hetzner_key root@e-pdf.bg "docker restart epdf-container"
@@ -155,7 +158,8 @@ certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --emai
 | `components/SeoSchema.js` | Reusable JSON-LD structured data; accepts optional `aggregateRating` prop for AggregateRating schema |
 | `components/StarRating.js` | Star rating widget (1–5★); localStorage deduplication (1 vote/user/tool) |
 | `styles/StarRating.module.css` | Styles for StarRating component |
-| `data/ratings.json` | Persistent ratings store (server-side JSON); seed: 3×5★ per tool; path configurable via `RATINGS_FILE_PATH` env |
+| `helpers/db.js` | SQLite database singleton (better-sqlite3); auto-creates tables + seeds on first run; WAL mode |
+| `data/ratings.db` | SQLite ratings database (auto-created at runtime); path configurable via `RATINGS_DB_PATH` env |
 | `pages/api/get-ratings.js` | GET — returns aggregated ratings for all tools |
 | `pages/api/rate-tool.js` | POST — records a user rating; serialized write queue prevents JSON corruption |
 | `helpers/utils.js` | File handling, upload/download, notifications |
@@ -196,7 +200,7 @@ npm run lint   # ESLint
 - **Split PDF tool:** Server-side tool using Ghostscript + qpdf. Supports two modes: "Split all pages" (each page as separate PDF) and "Split by ranges" (user-defined ranges like 1-3, 4-6). Uses `saveDataToJsonForSplit()` and `runSplitPDFCommand()` in `files-repo.js`. Output is a ZIP file. Page previews shown client-side via `handleExtractPagesFileSelection()`.
 - **Lighten PDF tool:** Fully client-side tool (`components/PDFLightenEditor.js`). Uses pdf.js CDN to render PDF pages to canvas, applies CSS `filter` property (`brightness()`, `contrast()`, `saturate()`) for real-time preview, and saves via pdf-lib by rendering each page through a filtered canvas to PNG then embedding in a new PDF. 4 presets (Scanned Doc, Photo, Faded, High Contrast) + 4 manual sliders (Brightness, Contrast, Saturation, Sharpness). Sharpness uses unsharp mask via canvas pixel manipulation. Dynamic import with `ssr: false`. No server-side processing needed. Legacy `pages/api/lighten-pdf.js` endpoint exists but is unused.
 - **Crop PDF tool:** Fully client-side tool (`components/PDFCropEditor.js`). Uses pdf.js CDN to render PDF pages to canvas for preview, overlays a draggable crop rectangle with 8 resize handles (4 corners + 4 edge midpoints) and semi-transparent dark masks. Margin input fields (Top/Right/Bottom/Left) with unit selector (mm/pt/in) for precise control, bidirectionally synced with the visual crop rectangle. "Apply to all pages" checkbox for uniform cropping. Saves via pdf-lib by setting MediaBox + CropBox + TrimBox on each page — **lossless vector output** (text stays searchable, links/annotations preserved, no rasterization). Coordinate conversion: PDF points ↔ display pixels via ratio mapping. Dynamic import with `ssr: false`. No server-side processing needed.
-- **Star ratings:** All 31 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in `/app/data/ratings.json` inside the container (persistent across `docker restart`, lost on container recreation).
+- **Star ratings:** All 31 tool pages have `<StarRating toolKey="..." />` in the header + `aggregateRating` prop on `<SeoSchema>`. Ratings stored in SQLite database (`/app/data/ratings.db`) via `better-sqlite3`. Schema: `ratings` table with `tool_key`, `rating`, `user_id`, `created_at`. Seeds 3×5★ per tool on first run. DB auto-created by `helpers/db.js`. WAL mode for concurrent reads. Deploy script must NOT overwrite `/app/data/` to preserve ratings.
 - **Homepage search:** Live search bar on the homepage (`pages/index.js`) filters tools in real-time by title, description, and key. Uses `useState` + `useMemo` for instant filtering. Search icon from `react-bootstrap-icons`. Styles in `styles/index.module.css` (`.search_wrapper` max-width 720px, `.search_input`, `.search_icon`, `.search_no_results`). Translations: `search_placeholder` and `search_no_results` in `common.json`. Banner is hidden during active search. The nav dropdown menu (`ToolsList.js`) also has its own search bar at the top with the same filtering logic — styles: `.menu_search_wrapper`, `.menu_search_input`, `.menu_search_icon`, `.menu_no_results` in `MegaMenu.module.css`.
 - **Mobile nav:** On ≤840px the dropdown is scrollable (`max-height: calc(100vh - var(--nav-height)); overflow-y: auto`). Items are compact (0.5rem margin, 13px font). Logo is 40px on all mobile sizes.
 - **Homepage banner:** Anagami.bg accounting services GIF banner added as last card in the tools grid (`/img/anagami-banner.gif`), links to `https://www.anagami.bg/uslugi/schetovodno-obslujvane/`.

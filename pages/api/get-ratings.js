@@ -1,29 +1,25 @@
-import path from "path";
-import fsPromises from "fs/promises";
+import getDb from "../../helpers/db.js";
 import { validateOrigin } from "../../helpers/validateOrigin.js";
 
-const RATINGS_FILE =
-  process.env.RATINGS_FILE_PATH ||
-  path.join(process.cwd(), "data", "ratings.json");
-
-const handler = async (req, res) => {
+const handler = (req, res) => {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const raw = await fsPromises.readFile(RATINGS_FILE, "utf-8");
-    const data = JSON.parse(raw);
+    const db = getDb();
+
+    const rows = db
+      .prepare(
+        "SELECT tool_key, COUNT(*) as cnt, ROUND(AVG(rating * 1.0), 1) as avg FROM ratings GROUP BY tool_key"
+      )
+      .all();
 
     const result = {};
-    for (const [key, val] of Object.entries(data)) {
-      const avg =
-        val.totalRatings > 0
-          ? Math.round((val.totalScore / val.totalRatings) * 10) / 10
-          : 5;
-      result[key] = {
-        averageRating: avg,
-        ratingCount: val.totalRatings,
+    for (const row of rows) {
+      result[row.tool_key] = {
+        averageRating: row.avg,
+        ratingCount: row.cnt,
       };
     }
 

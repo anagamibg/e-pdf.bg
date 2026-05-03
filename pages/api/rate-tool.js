@@ -1,23 +1,16 @@
-import path from "path";
-import fsPromises from "fs/promises";
+import getDb from "../../helpers/db.js";
 import { validateOrigin } from "../../helpers/validateOrigin.js";
-
-const RATINGS_FILE =
-  process.env.RATINGS_FILE_PATH ||
-  path.join(process.cwd(), "data", "ratings.json");
 
 const VALID_TOOL_KEYS = new Set([
   "EditPDF", "MergePDF", "RotatePDF", "RemovePDFPages", "OrganizePDF",
-  "CompressPDF", "GrayscalePDF", "ExtractPages", "RepairPDF", "ProtectPDF",
-  "UnlockPDF", "JPGToPDF", "PNGToPDF", "BMPToPDF", "TIFFToPDF", "WORDToPDF",
-  "PPTXToPDF", "TXTToPDF", "EXCELToPDF", "PDFToJPG", "PDFToPNG", "PDFToBMP",
-  "PDFToTIFF", "PDFToWORD", "PDFToPPTX", "PDFToTXT", "PDFToExcel", "PDFToZIP",
+  "CompressPDF", "GrayscalePDF", "LightenPDF", "ExtractPages", "RepairPDF",
+  "ProtectPDF", "UnlockPDF", "JPGToPDF", "PNGToPDF", "BMPToPDF", "TIFFToPDF",
+  "WORDToPDF", "PPTXToPDF", "TXTToPDF", "EXCELToPDF", "PDFToJPG", "PDFToPNG",
+  "PDFToBMP", "PDFToTIFF", "PDFToWORD", "PDFToPPTX", "PDFToTXT", "PDFToExcel",
+  "PDFToZIP", "SplitPDF", "CropPDF",
 ]);
 
-// Serialize writes to prevent JSON corruption under concurrent requests
-let writeQueue = Promise.resolve();
-
-const handler = async (req, res) => {
+const handler = (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -35,46 +28,36 @@ const handler = async (req, res) => {
     return res.status(400).json({ error: "Invalid userId" });
   }
 
-  return new Promise((resolve) => {
-    writeQueue = writeQueue.then(async () => {
-      try {
-        const raw = await fsPromises.readFile(RATINGS_FILE, "utf-8");
-        const data = JSON.parse(raw);
+  try {
+    const db = getDb();
 
-        const toolData = data[toolKey] || { totalRatings: 0, totalScore: 0, voters: [] };
+    // Check if already voted
+    const existing = db
+      .prepare("SELECT id FROM ratings WHERE tool_key = ? AND user_id = ?")
+      .get(toolKey, userId);
 
-        if (toolData.voters.includes(userId)) {
-          res.status(409).json({ error: "Already rated" });
-          resolve();
-          return;
-        }
+    if (existing) {
+      return res.status(409).json({ error: "Already rated" });
+    }
 
-        toolData.totalRatings += 1;
-        toolData.totalScore += ratingNum;
-        toolData.voters.push(userId);
-        data[toolKey] = toolData;
+    db.prepare(
+      "INSERT INTO ratings (tool_key, rating, user_id) VALUES (?, ?, ?)"
+    ).run(toolKey, ratingNum, userId);
 
-        await fsPromises.writeFile(
-          RATINGS_FILE,
-          JSON.stringify(data, null, 2),
-          "utf-8"
-        );
+    const stats = db
+      .prepare(
+        "SELECT COUNT(*) as cnt, ROUND(AVG(rating * 1.0), 1) as avg FROM ratings WHERE tool_key = ?"
+      )
+      .get(toolKey);
 
-        const avg =
-          Math.round((toolData.totalScore / toolData.totalRatings) * 10) / 10;
-
-        res.status(200).json({
-          averageRating: avg,
-          ratingCount: toolData.totalRatings,
-        });
-        resolve();
-      } catch (err) {
-        console.error("rate-tool error:", err);
-        res.status(500).json({ error: "Failed to save rating" });
-        resolve();
-      }
+    return res.status(200).json({
+      averageRating: stats.avg,
+      ratingCount: stats.cnt,
     });
-  });
+  } catch (err) {
+    console.error("rate-tool error:", err);
+    return res.status(500).json({ error: "Failed to save rating" });
+  }
 };
 
 export const config = {
