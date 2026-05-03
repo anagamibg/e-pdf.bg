@@ -124,3 +124,28 @@
     text-align: center !important;
   }
 }
+
+.network_bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background-color: #1a1a2e;
+  flex-wrap: wrap;
+}
+
+.network_bar a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+.network_bar a:hover {
+  color: #ffffff;
+  text-decoration: none;
+}

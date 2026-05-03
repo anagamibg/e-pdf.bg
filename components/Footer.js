@@ -65,6 +65,12 @@ const Footer = React.memo(function Footer() {
           </div>
         </div>
       </div>
+      <div className={styles.network_bar}>
+        <a href="https://e-fakturi.bg" target="_blank" rel="noopener noreferrer">e-fakturi.bg</a>
+        <a href="https://e-pdf.bg" target="_blank" rel="noopener noreferrer">e-pdf.bg</a>
+        <a href="https://e-kalkulator.bg" target="_blank" rel="noopener noreferrer">e-kalkulator.bg</a>
+        <a href="https://e-dokumenti.bg" target="_blank" rel="noopener noreferrer">e-dokumenti.bg</a>
+      </div>
     </footer>
   );
 });
