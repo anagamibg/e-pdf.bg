@@ -45,7 +45,7 @@ const Home = () => {
     "offers": {
       "@type": "Offer",
       "price": "0",
-      "priceCurrency": "BGN"
+      "priceCurrency": "EUR"
     },
     "description": t("common:meta_description"),
     "inLanguage": router.locale === "bg" ? "bg-BG" : "en"

@@ -149,7 +149,7 @@ const Nav = React.memo(function Nav() {
               className={`${styles.nav_toggle}`}
               onClick={() => setNavToggleShow(!navToggleShow)}
             >
-              {navToggleShow ? <X size={25} /> : <List size={25} />}
+              {navToggleShow ? <X size={30} /> : <List size={30} />}
             </div>
           </div>
         </nav>

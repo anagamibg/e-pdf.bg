@@ -17,7 +17,7 @@ const SeoSchema = ({ title, description, toolUrl, toolName, aggregateRating }) =
     "offers": {
       "@type": "Offer",
       "price": "0",
-      "priceCurrency": "BGN"
+      "priceCurrency": "EUR"
     },
     "description": description,
     "inLanguage": lang,
