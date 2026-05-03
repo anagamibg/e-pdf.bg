@@ -318,6 +318,10 @@
     padding: 0.5rem 0.5rem;
   }
 
+  .menu_search_icon {
+    left: 18px;
+  }
+
   .nav_action {
     gap: 0.5rem;
   }
