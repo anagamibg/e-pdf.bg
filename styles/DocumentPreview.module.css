@@ -48,13 +48,13 @@
   justify-content: center;
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0);
-  background: #f6f6f8;
-  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  background: var(--bg-secondary);
+  box-shadow: 0 0 4px 0 var(--shadow);
   border-radius: 7px;
 }
 
 .file:hover {
-  background-color: rgb(255, 255, 255);
+  background-color: var(--bg-input);
   transition: all 0.4s linear;
 }
 .file:hover .file_actions {
@@ -78,7 +78,7 @@
   height: 24px;
   flex: 0 0 24px;
   text-align: center;
-  background-color: #f6f6f8;
+  background-color: var(--bg-secondary);
   margin-left: 4px;
   z-index: 1030;
   border-radius: 7px;
@@ -99,7 +99,7 @@
   display: flex;
   position: relative;
   align-items: center;
-  background: #fff;
+  background: var(--bg-input);
 }
 
 .file:hover .file_canvas:after {
@@ -118,7 +118,7 @@
   z-index: 0;
 }
 .file_canvas canvas {
-  background-color: #fff;
+  background-color: var(--bg-input);
   display: flex;
   position: relative;
   z-index: 1;
@@ -227,7 +227,7 @@
 }
 
 .selected .file {
-  background-color: #2a74ed3b;
+  background-color: var(--border-primary-alpha);
 }
 
 .card {
@@ -247,7 +247,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1;
-  background: #fff;
+  background: var(--bg-input);
 }
 
 .file:hover .file_image:after {

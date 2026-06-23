@@ -10,16 +10,16 @@
   padding: 14px 20px 14px 48px;
   font-size: 16px;
   font-weight: 300;
-  border: 2px solid #2a74ed30;
+  border: 2px solid var(--border-primary-alpha);
   border-radius: 12px;
-  background: #fff;
+  background: var(--bg-input);
   color: var(--text-primary);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .search_input::placeholder {
-  color: #a0aec0;
+  color: var(--placeholder);
 }
 
 .search_input:focus {
@@ -32,7 +32,7 @@
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #a0aec0;
+  color: var(--placeholder);
   font-size: 20px;
   pointer-events: none;
 }
@@ -80,10 +80,10 @@
 }
 
 .grid_item {
-  background-color: #e8f0fd;
+  background-color: var(--secondary);
   padding: 20px;
   border-radius: 8px;
-  border: 2px solid #2a74ed17;
+  border: 2px solid var(--border-primary-alpha2);
 }
 
 .grid_content {
@@ -139,7 +139,7 @@
   border-radius: 8px;
   overflow: hidden;
   display: block;
-  border: 2px solid #2a74ed17;
+  border: 2px solid var(--border-primary-alpha2);
 }
 
 .banner_img {

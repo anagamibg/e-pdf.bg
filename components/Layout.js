@@ -10,10 +10,10 @@ const BackToTopButton = dynamic(() => import("./BackToTopButton"), {
 import Nav from "./Nav";
 import Footer from "./Footer";
 import { rtlLanguages } from "../helpers/utils";
-import { Open_Sans } from "next/font/google";
+import { Onest } from "next/font/google";
 
 // Google Font
-const openSans = Open_Sans({
+const onest = Onest({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin", "cyrillic"],
   display: "swap",
@@ -38,7 +38,7 @@ const Layout = ({ children }) => {
   });
 
   return (
-    <div style={langStyle} className={openSans.className}>
+    <div style={langStyle} className={onest.className}>
       <ToastAlert />
       <BackToTopButton />
 

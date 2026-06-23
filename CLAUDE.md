@@ -151,7 +151,7 @@ certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --emai
 |------|---------|
 | `hooks/useToolsData.js` | Central tool registry — all tools defined here |
 | `components/ToolsList.js` | Navigation dropdown menu — manually lists tools by group |
-| `components/Nav.js` | Header navigation with sticky positioning; includes inline language dropdown |
+| `components/Nav.js` | Header navigation with sticky positioning; includes inline language dropdown and theme toggle (light/dark/system) |
 | `components/PDFEditor.js` | PDF editor with HTML text layer overlay for inline editing of existing PDF text + canvas tools for images/erasers/signatures |
 | `components/PDFLightenEditor.js` | Lighten PDF editor — client-side canvas preview with real-time CSS filters (brightness, contrast, saturation, sharpness) + pdf-lib save |
 | `components/PDFCropEditor.js` | Crop PDF editor — client-side canvas preview with draggable crop rectangle + pdf-lib CropBox/MediaBox/TrimBox manipulation for lossless cropping |
@@ -164,7 +164,7 @@ certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --emai
 | `pages/api/rate-tool.js` | POST — records a user rating; serialized write queue prevents JSON corruption |
 | `helpers/utils.js` | File handling, upload/download, notifications |
 | `helpers/files-repo.js` | Server-side file management, command execution |
-| `styles/global.css` | Global styles, CSS variables, base font settings |
+| `styles/global.css` | Global styles, CSS variables (light+dark theme), base font settings |
 | `styles/MegaMenu.module.css` | Header/navigation styles |
 | `next.config.js` | i18n config, env variables, image domains |
 | `scripts/pdf-to-excel.py` | Python script for PDF→XLSX conversion using pdfplumber + openpyxl |
@@ -172,9 +172,33 @@ certbot --nginx -d e-pdf.bg -d www.e-pdf.bg --non-interactive --agree-tos --emai
 | `CHANGELOG.md` | Version history and release notes |
 
 ## CSS Variables (defined in global.css)
-- `--secondary` — primary brand color (used for header, buttons, accents)
+
+### Light/Dark Theme
+The site supports light and dark themes via `[data-theme="dark"]` attribute on `<html>`. CSS variables are overridden in the dark theme block.
+
+**Theme switching:** Three modes — System (auto), Light, Dark. Cycle button in `Nav.js` using `SunFill`/`MoonFill`/`CircleHalf` icons. User preference stored in `localStorage("theme")`. Anti-FOUC blocking script in `_document.js` sets `data-theme` before paint.
+
+**Key variables (light → dark):**
+- `--primary` — `#2a74ed` → `#4a94ff` (brand blue)
+- `--secondary` — `#e8f0fd` → `#1e293b` (nav/card backgrounds)
+- `--bg-primary` — `#fff` → `#0f172a` (body background)
+- `--bg-secondary` — `#f6f6f8` → `#1e293b` (card backgrounds)
+- `--bg-input` — `#fff` → `#1e293b` (input/select backgrounds)
+- `--text-primary` — `#2d3748` → `#e2e8f0` (main text)
+- `--text-secondary` — `#667085` → `#94a3b8` (secondary text)
+- `--text-dark` — `rgba(0,0,0,0.8)` → `#e2e8f0` (body text)
+- `--text-heading` — `rgba(33,33,33,1)` → `#e2e8f0` (headings)
+- `--border-light` — `#ccc` → `#334155` (borders)
+- `--border-divider` — `rgba(0,0,0,0.08)` → `rgba(255,255,255,0.08)` (dividers)
+- `--accent` — `#1ab5a8` → `#2dd4bf` (teal accent)
+- `--placeholder` — `#a0aec0` → `#64748b`
+- `--hover-bg` — `rgba(242,242,242,1)` → `rgba(51,65,85,1)`
+- `--footer-bg`, `--share-btn-bg`, `--spinner-overlay`, `--scrollbar-thumb` — also themed
+
+**When adding new colors:** Always use CSS variables. Add light value to `:root`, dark value to `[data-theme="dark"]` in `global.css`. Never hardcode colors in CSS modules.
+
+### Other Variables
 - `--nav-height` — navigation bar height
-- `--text-primary`, `--text-secondary` — text colors
 
 ## Build & Development
 ```bash
@@ -191,11 +215,12 @@ npm run lint   # ESLint
 
 ## Important Notes
 - **Sticky header:** Uses `position: sticky` on `<header>` element. Requires `overflow-x: clip` (not `hidden`) on body.
-- **Base font:** `html { font-size: 16px }`, `body { font-size: 16px; font-weight: 300; line-height: 1.5 }`, `.article_content { font-size: 16px; font-weight: 300; line-height: 24px }`
+- **Base font:** Onest (Google Fonts), loaded via `next/font/google` in `Layout.js`. Weights: 300, 400, 500, 600, 700. Subsets: latin, cyrillic. Fallback: `font-family: "Onest", sans-serif` in `global.css`. `html { font-size: 16px }`, `body { font-size: 16px; font-weight: 300; line-height: 1.5 }`, `.article_content { font-size: 16px; font-weight: 300; line-height: 24px }`
 - **Google Analytics:** G-C4D38EX2MD (set in next.config.js)
 - **noindex:** Currently active for development phase
 - **PDF Editor CDN:** pdf.js loaded from cdnjs.cloudflare.com (v3.11.174), not npm
 - **No fabric.js needed:** The editor uses native HTML5 Canvas API instead
+- **Dark theme:** Supports light/dark/system modes. Uses `[data-theme="dark"]` on `<html>` with CSS variable overrides in `global.css`. Theme dropdown in `Nav.js` (styled like language switcher) with icon + label for each option. `localStorage("theme")` stores preference. Anti-FOUC script in `_document.js` reads preference before paint. Dark logo (`/img/logo-dark.png`) swaps in Nav.js (via `isDark` state) and Footer.js (via CSS `.logo-light`/`.logo-dark` classes in `global.css`). Translations: `theme_light`, `theme_dark`, `theme_system` in `common.json`. Styles: `.theme_dropdown*` in `MegaMenu.module.css`.
 - **Language switcher:** Inline dropdown in nav (no modal). `LangModal.js` and `LangModal.module.css` removed. Styles live in `MegaMenu.module.css` under `.lang_dropdown*` classes. On mobile (≤600px), the language button shows only the flag icon (text label hidden via `.btn_primary :global(.lang_label) { display: none }` in `MegaMenu.module.css`). `LanguageCountryFlag` component wraps label text in `<span className="lang_label">` for CSS targeting.
 - **Split PDF tool:** Server-side tool using Ghostscript + qpdf. Supports two modes: "Split all pages" (each page as separate PDF) and "Split by ranges" (user-defined ranges like 1-3, 4-6). Uses `saveDataToJsonForSplit()` and `runSplitPDFCommand()` in `files-repo.js`. Output is a ZIP file. Page previews shown client-side via `handleExtractPagesFileSelection()`.
 - **Lighten PDF tool:** Fully client-side tool (`components/PDFLightenEditor.js`). Uses pdf.js CDN to render PDF pages to canvas, applies CSS `filter` property (`brightness()`, `contrast()`, `saturate()`) for real-time preview, and saves via pdf-lib by rendering each page through a filtered canvas to PNG then embedding in a new PDF. 4 presets (Scanned Doc, Photo, Faded, High Contrast) + 4 manual sliders (Brightness, Contrast, Saturation, Sharpness). Sharpness uses unsharp mask via canvas pixel manipulation. Dynamic import with `ssr: false`. No server-side processing needed. Legacy `pages/api/lighten-pdf.js` endpoint exists but is unused.

@@ -10,7 +10,7 @@
   width: 32px;
   height: 3px;
   border-radius: 40px;
-  background-color: #1ab5a8;
+  background-color: var(--accent);
 }
 .mx_auto {
   margin-left: auto !important;

@@ -33,7 +33,7 @@
   font-size: 16px;
   font-stretch: 400;
   font-weight: 700;
-  color: rgba(33, 33, 33, 1);
+  color: var(--text-heading);
   text-align: center;
   margin: 0;
   padding: 12px 0;
@@ -44,7 +44,7 @@
   font-size: 16px;
   font-stretch: 400;
   font-weight: 400;
-  color: rgba(33, 33, 33, 1);
+  color: var(--text-heading);
   text-align: center;
   margin: 0;
   padding: 0 24px;

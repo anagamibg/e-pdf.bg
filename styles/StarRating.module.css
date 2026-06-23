@@ -62,7 +62,7 @@
 
 .thank_you {
   font-size: 0.85rem;
-  color: #111827;
+  color: var(--text-primary);
   margin-top: 4px;
   font-weight: 500;
 }

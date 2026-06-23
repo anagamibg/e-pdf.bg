@@ -5,7 +5,7 @@ import ToolsList from "./ToolsList";
 import { useTranslation } from "next-i18next";
 import LanguageCountryFlag from "./LanguageCountryFlag";
 import styles from "../styles/MegaMenu.module.css";
-import { List, ChevronDown, X, ChevronUp } from "react-bootstrap-icons";
+import { List, ChevronDown, X, ChevronUp, SunFill, MoonFill, CircleHalf } from "react-bootstrap-icons";
 import useToolsData from "../hooks/useToolsData";
 
 const Nav = React.memo(function Nav() {
@@ -13,13 +13,49 @@ const Nav = React.memo(function Nav() {
   const toolsData = useToolsData();
   const { t } = useTranslation();
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [showThemeDropdown, setShowThemeDropdown] = useState(false);
   const [navToggleShow, setNavToggleShow] = useState(false);
+  // theme: "system" | "light" | "dark"
+  const [themeMode, setThemeMode] = useState("system");
+  const [isDark, setIsDark] = useState(false);
   const navMenuRef = useRef(null);
   const langDropdownRef = useRef(null);
+  const themeDropdownRef = useRef(null);
+
+  const applyTheme = (mode) => {
+    const dark = mode === "dark" ||
+      (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    if (dark) {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+    setIsDark(dark);
+  };
+
+  const selectTheme = (mode) => {
+    setThemeMode(mode);
+    if (mode === "system") {
+      localStorage.removeItem("theme");
+    } else {
+      localStorage.setItem("theme", mode);
+    }
+    applyTheme(mode);
+    setShowThemeDropdown(false);
+  };
+
+  const themeOptions = [
+    { key: "light", icon: <SunFill size={16} />, label: t("common:theme_light") },
+    { key: "dark", icon: <MoonFill size={16} />, label: t("common:theme_dark") },
+    { key: "system", icon: <CircleHalf size={16} />, label: t("common:theme_system") },
+  ];
+
+  const currentThemeOption = themeOptions.find((o) => o.key === themeMode) || themeOptions[2];
 
   const handleRouteChange = () => {
     setNavToggleShow(false);
     setShowLangDropdown(false);
+    setShowThemeDropdown(false);
   };
 
   const handleClickOutside = (event) => {
@@ -29,13 +65,37 @@ const Nav = React.memo(function Nav() {
     if (langDropdownRef.current && !langDropdownRef.current.contains(event.target)) {
       setShowLangDropdown(false);
     }
+    if (themeDropdownRef.current && !themeDropdownRef.current.contains(event.target)) {
+      setShowThemeDropdown(false);
+    }
   };
 
   useEffect(() => {
+    // Initialize theme from localStorage
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") {
+      setThemeMode(saved);
+      applyTheme(saved);
+    } else {
+      setThemeMode("system");
+      applyTheme("system");
+    }
+
+    // Listen for system preference changes
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleSystemChange = () => {
+      const current = localStorage.getItem("theme");
+      if (!current || current === "system") {
+        applyTheme("system");
+      }
+    };
+    mq.addEventListener("change", handleSystemChange);
+
     document.addEventListener("mousedown", handleClickOutside);
     router.events.on("routeChangeComplete", handleRouteChange);
 
     return () => {
+      mq.removeEventListener("change", handleSystemChange);
       document.removeEventListener("mousedown", handleClickOutside);
       router.events.off("routeChangeComplete", handleRouteChange);
     };
@@ -47,7 +107,7 @@ const Nav = React.memo(function Nav() {
         <nav className={`${styles.navigation}`}>
           <Link href="/" className={`${styles.logo}`}>
             <img
-              src="/img/logo.png"
+              src={isDark ? "/img/logo-dark.png" : "/img/logo.png"}
               alt="e-pdf.bg"
               className={styles.logo_img}
             />
@@ -118,6 +178,31 @@ const Nav = React.memo(function Nav() {
             >
               Счетоводни услуги
             </a>
+            <div
+              ref={themeDropdownRef}
+              className={`${styles.theme_dropdown} ${showThemeDropdown ? styles.theme_dropdown_open : ""}`}
+            >
+              <div
+                className={`${styles.theme_toggle}`}
+                onClick={() => setShowThemeDropdown(!showThemeDropdown)}
+              >
+                {currentThemeOption.icon}
+                <ChevronDown className={styles.theme_chevron} size={12} />
+              </div>
+              <ul className={styles.theme_dropdown_menu}>
+                {themeOptions.map((option) => (
+                  <li key={option.key}>
+                    <button
+                      className={`${styles.theme_dropdown_item} ${themeMode === option.key ? styles.theme_dropdown_item_active : ""}`}
+                      onClick={() => selectTheme(option.key)}
+                    >
+                      {option.icon}
+                      <span>{option.label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div
               ref={langDropdownRef}
               className={`${styles.lang_dropdown} ${showLangDropdown ? styles.lang_dropdown_open : ""}`}

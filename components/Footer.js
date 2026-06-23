@@ -20,8 +20,15 @@ const Footer = React.memo(function Footer() {
         <div className={`row ${styles.footer_bottom}`}>
           <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-start mb-3">
             <img
-              src="https://e-pdf.bg/img/logo.png"
+              src="/img/logo.png"
               alt="e-pdf.bg"
+              className="logo-light"
+              style={{ maxWidth: "180px", marginBottom: "12px" }}
+            />
+            <img
+              src="/img/logo-dark.png"
+              alt="e-pdf.bg"
+              className="logo-dark"
               style={{ maxWidth: "180px", marginBottom: "12px" }}
             />
             <p className={styles.footer_info}>

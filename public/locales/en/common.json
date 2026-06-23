@@ -154,5 +154,8 @@
   "seo_section_2_title": "Convert PDF Files to Any Format",
   "seo_section_2_text": "Our conversion tools handle the full range of PDF workflows. Export PDFs as editable Word documents, Excel spreadsheets, or PowerPoint presentations. Convert JPG, PNG, BMP, and TIFF images to PDF and back. Every conversion preserves the original layout and quality of your documents so the result looks exactly as expected.",
   "seo_section_3_title": "Your Files Stay Private",
-  "seo_section_3_text": "Privacy is built into every tool on e-pdf.bg. All uploaded files are processed on our servers and automatically and permanently deleted within one hour. We never store, read, or share your documents with anyone. You can also add password protection to your PDF files or remove existing passwords with our PDF security tools."
+  "seo_section_3_text": "Privacy is built into every tool on e-pdf.bg. All uploaded files are processed on our servers and automatically and permanently deleted within one hour. We never store, read, or share your documents with anyone. You can also add password protection to your PDF files or remove existing passwords with our PDF security tools.",
+  "theme_light": "Light theme",
+  "theme_dark": "Dark theme",
+  "theme_system": "System default"
 }

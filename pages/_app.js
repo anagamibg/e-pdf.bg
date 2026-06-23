@@ -35,7 +35,8 @@ const MyApp = ({ Component, pageProps }) => {
       <Head>
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
         <meta name="author" content="" />
-        <meta name="theme-color" content="#2d3748" />
+        <meta name="theme-color" content="#e8f0fd" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#1e293b" media="(prefers-color-scheme: dark)" />
         <link rel="icon" href="/img/favicon.png" />
         <link rel="apple-touch-icon" href="/img/favicon.png" />
         <meta

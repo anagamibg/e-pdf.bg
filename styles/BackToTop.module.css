@@ -19,7 +19,7 @@
 
 .back_to_top_btn svg:hover {
   cursor: pointer;
-  color: #1ab5a8;
+  color: var(--accent);
 }
 
 .back_to_top_btn.show {

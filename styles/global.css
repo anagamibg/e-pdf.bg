@@ -14,13 +14,13 @@ html {
 }
 
 body {
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--text-dark);
   font-weight: 300;
   font-size: 16px;
   line-height: 1.5;
   letter-spacing: -0.0125em;
-  background-color: #fff;
-  font-family: "Open Sans", sans-serif;
+  background-color: var(--bg-primary);
+  font-family: "Onest", sans-serif;
 }
 
 body {
@@ -44,7 +44,57 @@ body,
   --dropdown-bg: rgb(252, 253, 251);
   --shadow: rgba(10, 37, 77, 0.14);
   --nav-height: 4rem;
+  --bg-primary: #fff;
+  --bg-secondary: #f6f6f8;
+  --bg-input: #fff;
+  --border-light: #ccc;
+  --border-divider: rgba(0, 0, 0, 0.08);
+  --border-primary-alpha: #2a74ed30;
+  --border-primary-alpha2: #2a74ed17;
+  --text-dark: rgba(0, 0, 0, 0.8);
+  --text-heading: rgba(33, 33, 33, 1);
+  --accent: #1ab5a8;
+  --placeholder: #a0aec0;
+  --hover-bg: rgba(242, 242, 242, 1);
+  --hover-bg-active: rgba(229, 229, 229, 1);
+  --scrollbar-thumb: #4d90fe1c;
+  --spinner-overlay: hsla(0, 0%, 100%, 0.6);
+  --footer-bg: #2a74ed1c;
+  --share-btn-bg: #2988bc29;
 }
+
+[data-theme="dark"] {
+  --primary: #4a94ff;
+  --secondary: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --white: #0f172a;
+  --dropdown-bg: #1e293b;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-input: #1e293b;
+  --border-light: #334155;
+  --border-divider: rgba(255, 255, 255, 0.08);
+  --border-primary-alpha: #4a94ff30;
+  --border-primary-alpha2: #4a94ff17;
+  --text-dark: #e2e8f0;
+  --text-heading: #e2e8f0;
+  --accent: #2dd4bf;
+  --placeholder: #64748b;
+  --hover-bg: rgba(51, 65, 85, 1);
+  --hover-bg-active: rgba(71, 85, 105, 1);
+  --scrollbar-thumb: #4a94ff1c;
+  --spinner-overlay: hsla(222, 47%, 11%, 0.6);
+  --footer-bg: #1e293b;
+  --share-btn-bg: #4a94ff1c;
+}
+
+/* Logo theme swap helpers */
+.logo-light { display: inline; }
+.logo-dark { display: none; }
+[data-theme="dark"] .logo-light { display: none; }
+[data-theme="dark"] .logo-dark { display: inline; }
 
 a {
   text-decoration: none;
@@ -138,7 +188,7 @@ a:hover {
 .dot {
   height: 4px;
   width: 4px;
-  background-color: #1ab5a8;
+  background-color: var(--accent);
   border-radius: 50%;
   display: inline-block;
   margin-left: 2px;
@@ -147,7 +197,7 @@ a:hover {
 .selecto-selection {
   border: 2px dashed var(--primary) !important;
   border-radius: 6px !important;
-  background: #2a74ed12 !important;
+  background: var(--border-primary-alpha2) !important;
   z-index: 999 !important;
 }
 
@@ -167,7 +217,7 @@ a:hover {
 
 .description {
   font-size: 20px;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .page_section {
@@ -218,7 +268,7 @@ input[type="radio" i] {
 
 label.checked {
   border: 2px solid var(--primary);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px 0 var(--shadow);
 }
 
 article {
@@ -233,12 +283,12 @@ select {
   flex-basis: 0;
   text-align: center;
   padding: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-light);
   border-radius: 3px;
   margin: 5px;
   width: 200px;
-  background-color: #fff;
-  color: #333;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 500;
 }
@@ -247,13 +297,13 @@ input[type="checkbox"] {
   margin: 5px;
   width: 20px;
   height: 20px;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-light);
   border-radius: 3px;
 }
 
 input[type="checkbox"]:checked {
-  background-color: #007bff;
+  background-color: var(--primary);
   color: #fff;
 }
 
@@ -308,9 +358,9 @@ select:disabled {
 }
 
 .get_app a {
-  color: #2a74ed !important;
+  color: var(--primary) !important;
 }
 
 .get_app a:hover {
-  color: #1ab5a8 !important;
+  color: var(--accent) !important;
 }

@@ -3,16 +3,16 @@
   display: block;
   padding-top: 20px;
   padding-bottom: 16px;
-  background-color: #2a74ed1c;
+  background-color: var(--footer-bg);
 }
 
 .page_footer p a {
-  color: #2d2b3a;
+  color: var(--text-primary);
   transition: color 0.2s ease;
 }
 
 .page_footer h3 {
-  color: #2d2b3a;
+  color: var(--text-primary);
   margin-bottom: 24px;
   font-size: 1.75rem;
   font-weight: bold;
@@ -21,7 +21,7 @@
 }
 
 .page_footer p {
-  color: #2d2b3a;
+  color: var(--text-primary);
 }
 
 .footer_menu {
@@ -58,7 +58,7 @@
 
 .footer_menu a,
 .footer_link {
-  color: #2d2b3a;
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -69,7 +69,7 @@
   line-height: 44px;
   text-align: center;
   border-radius: 50%;
-  background-color: #2988bc29;
+  background-color: var(--share-btn-bg);
   color: var(--text-primary);
   transition: all 0.2s linear;
 }
@@ -93,19 +93,19 @@
 .footer_bottom {
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--border-divider);
   align-items: center;
 }
 
 .footer_info {
   font-size: 13px;
   line-height: 1.5;
-  color: #333333;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .footer_info a {
-  color: #333333;
+  color: var(--text-primary);
   transition: color 0.2s ease;
 }
 
@@ -132,12 +132,12 @@
   gap: 32px;
   margin-top: 20px;
   padding: 12px 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--border-divider);
   flex-wrap: wrap;
 }
 
 .network_bar a {
-  color: #555555;
+  color: var(--text-secondary);
   text-decoration: none;
   font-size: 13px;
   font-weight: 400;

@@ -27,7 +27,7 @@
 }
 .spinner.active {
   z-index: 999;
-  background-color: hsla(0, 0%, 100%, 0.6);
+  background-color: var(--spinner-overlay);
   opacity: 1;
 }
 .spinner.active .spinner_inner {
