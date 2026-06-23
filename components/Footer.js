@@ -77,6 +77,7 @@ const Footer = React.memo(function Footer() {
         <a href="https://e-pdf.bg" target="_blank" rel="noopener noreferrer">e-pdf.bg</a>
         <a href="https://e-kalkulator.bg" target="_blank" rel="noopener noreferrer">e-kalkulator.bg</a>
         <a href="https://e-dokumenti.bg" target="_blank" rel="noopener noreferrer">e-dokumenti.bg</a>
+        <a href="https://generatorzaparoli.bg" target="_blank" rel="noopener noreferrer">generatorzaparoli.bg</a>
       </div>
     </footer>
   );
