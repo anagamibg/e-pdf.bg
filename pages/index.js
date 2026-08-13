@@ -136,6 +136,9 @@ const Home = () => {
                       src={router.locale === "en" ? "/img/banner-anagami-en.gif" : "/img/anagami-banner.gif"}
                       alt={router.locale === "en" ? "Anagami — Accounting Services" : "Anagami — Счетоводно обслужване"}
                       className={styles.banner_img}
+                      width={500}
+                      height={600}
+                      loading="lazy"
                     />
                   </a>
                 )}

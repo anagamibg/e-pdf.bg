@@ -106,11 +106,14 @@ const Nav = React.memo(function Nav() {
       <div>
         <nav className={`${styles.navigation}`}>
           <Link href="/" className={`${styles.logo}`}>
-            <img
-              src={isDark ? "/img/logo-dark.png" : "/img/logo.png"}
-              alt="e-pdf.bg"
-              className={styles.logo_img}
-            />
+            <picture>
+              <source srcSet={isDark ? "/img/logo-dark.webp" : "/img/logo.webp"} type="image/webp" />
+              <img
+                src={isDark ? "/img/logo-dark.png" : "/img/logo.png"}
+                alt="e-pdf.bg"
+                className={styles.logo_img}
+              />
+            </picture>
           </Link>
           <ul
             ref={navMenuRef}
