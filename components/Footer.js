@@ -19,23 +19,13 @@ const Footer = React.memo(function Footer() {
       <div className={`container text-center mb-0`}>
         <div className={`row ${styles.footer_bottom}`}>
           <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-start text-start mb-3">
-            <picture>
+            <picture className="logo-light" style={{ maxWidth: "180px", marginBottom: "12px" }}>
               <source srcSet="/img/logo.webp" type="image/webp" />
-              <img
-                src="/img/logo.png"
-                alt="e-pdf.bg"
-                className="logo-light"
-                style={{ maxWidth: "180px", marginBottom: "12px" }}
-              />
+              <img src="/img/logo.png" alt="e-pdf.bg" style={{ width: "100%" }} />
             </picture>
-            <picture>
+            <picture className="logo-dark" style={{ maxWidth: "180px", marginBottom: "12px" }}>
               <source srcSet="/img/logo-dark.webp" type="image/webp" />
-              <img
-                src="/img/logo-dark.png"
-                alt="e-pdf.bg"
-                className="logo-dark"
-                style={{ maxWidth: "180px", marginBottom: "12px" }}
-              />
+              <img src="/img/logo-dark.png" alt="e-pdf.bg" style={{ width: "100%" }} />
             </picture>
             <p className={styles.footer_info}>
               Създадено от{" "}
