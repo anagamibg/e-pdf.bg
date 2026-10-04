@@ -101,10 +101,10 @@ const EditPDFPage = () => {
       return;
     }
 
-    if (fileSize > 26214400) {
+    if (fileSize > 41943040) {
       notify(
         "warning",
-        "The file is too large. Please try to upload a file smaller than 25MB."
+        "The file is too large. Please try to upload a file smaller than 40MB."
       );
       return;
     }
