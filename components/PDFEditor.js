@@ -1523,6 +1523,134 @@ const PDFEditor = ({ pdfDocument, onSave, fileName }) => {
     e.target.value = "";
   };
 
+  // ── Paste handling (images, HTML tables from Excel, plain text) ──────
+  const pasteHtmlTableAsImage = useCallback((html) => {
+    // Extract <table>...</table> from clipboard HTML
+    const tableMatch = html.match(/<table[\s\S]*?<\/table>/i);
+    if (!tableMatch) return;
+    let tableHtml = tableMatch[0];
+
+    // Sanitize: remove scripts and event handlers
+    tableHtml = tableHtml.replace(/<script[\s\S]*?<\/script>/gi, "");
+    tableHtml = tableHtml.replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, "");
+
+    // Measure the table by rendering in a hidden div
+    const measurer = document.createElement("div");
+    measurer.style.cssText = "position:absolute;left:-9999px;top:-9999px;visibility:hidden;";
+    measurer.innerHTML = `<div style="font-family:sans-serif;font-size:14px;line-height:1.4;">${tableHtml}</div>`;
+    document.body.appendChild(measurer);
+
+    // Add default table styles if Excel didn't provide borders
+    const tables = measurer.querySelectorAll("table");
+    tables.forEach((tbl) => {
+      if (!tbl.getAttribute("border") && !tbl.style.border) {
+        tbl.style.borderCollapse = "collapse";
+        tbl.querySelectorAll("td, th").forEach((cell) => {
+          if (!cell.style.border) {
+            cell.style.border = "1px solid #999";
+            cell.style.padding = "4px 8px";
+          }
+        });
+      }
+    });
+
+    const measured = measurer.firstChild;
+    const w = measured.scrollWidth + 2;
+    const h = measured.scrollHeight + 2;
+    const styledHtml = measured.innerHTML;
+    document.body.removeChild(measurer);
+
+    // Render to image via SVG foreignObject
+    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:sans-serif;font-size:14px;line-height:1.4;">
+          ${styledHtml}
+        </div>
+      </foreignObject>
+    </svg>`;
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const dataUrl = canvas.toDataURL("image/png");
+      addImageElement(dataUrl, w, h);
+    };
+    img.onerror = () => {
+      // Fallback: paste as plain text if SVG rendering fails
+      const plainText = tableHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      if (plainText) pasteAsTextElement(plainText);
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgContent);
+  }, [currentPage, pageElements]);
+
+  const pasteAsTextElement = useCallback((text) => {
+    const newElement = {
+      type: "text",
+      text,
+      x: 50,
+      y: 50,
+      fontSize,
+      color: fontColor,
+      fontFamily: selectedFontFamily,
+      bold: isBold,
+      italic: isItalic,
+      underline: isUnderline,
+      width: Math.min(400, Math.max(200, text.length * 8)),
+    };
+    setPageElements((prev) => ({
+      ...prev,
+      [currentPage]: [...(prev[currentPage] || []), newElement],
+    }));
+  }, [currentPage, fontSize, fontColor, selectedFontFamily, isBold, isItalic, isUnderline]);
+
+  const handlePaste = useCallback((e) => {
+    // Don't intercept if editing existing text (let browser handle contentEditable/textarea)
+    if (editingSpanIndex !== null || editingText) return;
+    if (!pdfPages.length) return;
+
+    const clipboardData = e.clipboardData;
+    if (!clipboardData) return;
+
+    // 1. Check for image in clipboard (screenshots, copied images)
+    const imageItem = [...clipboardData.items].find((item) => item.type.startsWith("image/"));
+    if (imageItem) {
+      e.preventDefault();
+      const blob = imageItem.getAsFile();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => addImageElement(reader.result, img.width, img.height);
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(blob);
+      return;
+    }
+
+    // 2. Check for HTML table (Excel cells/tables)
+    const html = clipboardData.getData("text/html");
+    if (html && /<table[\s>]/i.test(html)) {
+      e.preventDefault();
+      pasteHtmlTableAsImage(html);
+      return;
+    }
+
+    // 3. Plain text paste
+    const text = clipboardData.getData("text/plain");
+    if (text && text.trim()) {
+      e.preventDefault();
+      pasteAsTextElement(text.trim());
+    }
+  }, [editingSpanIndex, editingText, pdfPages, pasteHtmlTableAsImage, pasteAsTextElement]);
+
+  useEffect(() => {
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [handlePaste]);
+
   // ── Signature canvas drawing ──────────────────────────────────────────
   const getSignCoords = (e, canvas) => {
     const rect = canvas.getBoundingClientRect();
