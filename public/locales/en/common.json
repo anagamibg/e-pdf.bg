@@ -157,5 +157,7 @@
   "seo_section_3_text": "Privacy is built into every tool on e-pdf.bg. All uploaded files are processed on our servers and automatically and permanently deleted within one hour. We never store, read, or share your documents with anyone. You can also add password protection to your PDF files or remove existing passwords with our PDF security tools.",
   "theme_light": "Light theme",
   "theme_dark": "Dark theme",
-  "theme_system": "System default"
+  "theme_system": "System default",
+  "footer_trademark": "Anagami is a registered trademark of “AAAccounting Office” Ltd., UIN: 204472705",
+  "footer_address": "Sofia 1000, 14 Tsar Osvoboditel Blvd., Landmark Centre"
 }

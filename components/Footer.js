@@ -52,9 +52,9 @@ const Footer = React.memo(function Footer() {
           </div>
           <div className="col-lg-6 col-md-6 col-12 d-flex flex-column align-items-end text-end mb-3">
             <p className={styles.footer_info}>
-              Anagami е запазена марка на АААкаунтинг Плюс EООД, ЕИК: 204467213
+              {t("common:footer_trademark")}
               <br />
-              гр. София 1000, бул. Цар Освободител 14, Landmark Centre
+              {t("common:footer_address")}
             </p>
             <p className={styles.footer_info}>
               <a href="https://www.anagami.bg/kontakti/" target="_blank" rel="noopener noreferrer">
